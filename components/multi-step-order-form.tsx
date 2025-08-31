@@ -737,8 +737,7 @@ export function MultiStepOrderForm() {
                 </p>
               </div>
 
-              <Button onClick={handleSubmit} size="lg" className="w-full text-responsive py-3 sm:py-4 mt-4">
-                <Check className="h-4 w-4 mr-2" />
+              <Button onClick={handleSubmit} size="lg" className="w-full text-responsive py-3 sm:py-4 mt-4 text-white">
                 Confirmer la commande
               </Button>
             </CardContent>
