@@ -183,6 +183,7 @@ const PACKS = [
     description: "Tous les chants harmonisés/orchestrés, groupe 1 à 10 personnes",
     priceEUR: 100,
     priceFCFA: 50000,
+    monthly: true,
   },
   {
     id: "ekklesia2",
@@ -190,6 +191,7 @@ const PACKS = [
     description: "Tous les chants harmonisés/orchestrés, groupe 11 à 50 personnes",
     priceEUR: 200,
     priceFCFA: 100000,
+    monthly: true,
   },
   {
     id: "ekklesia3",
@@ -197,6 +199,7 @@ const PACKS = [
     description: "Tous les chants harmonisés/orchestrés, groupe 51 à 100 personnes",
     priceEUR: 300,
     priceFCFA: 150000,
+    monthly: true,
   },
   {
     id: "ekklesia4",
@@ -204,6 +207,7 @@ const PACKS = [
     description: "Tous les chants harmonisés/orchestrés, groupe >100 personnes",
     priceEUR: 300,
     priceFCFA: 200000,
+    monthly: true,
   },
 ]
 
@@ -731,9 +735,6 @@ export function MultiStepOrderForm() {
                 <p className="text-2xl sm:text-3xl md:text-4xl font-bold">
                   {calculateTotal().toLocaleString()} {formData.currency}
                 </p>
-                {formData.selectedPack === "david" && (
-                  <p className="text-xs sm:text-sm opacity-90 mt-2">* Pack David facturé mensuellement</p>
-                )}
               </div>
 
               <Button onClick={handleSubmit} size="lg" className="w-full text-responsive py-3 sm:py-4 mt-4">
