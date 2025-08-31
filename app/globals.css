@@ -1,0 +1,174 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #374151;
+  --card: #fef7f0;
+  --card-foreground: #475569;
+  --popover: #ffffff;
+  --popover-foreground: #374151;
+  /* Updated primary to match logo burgundy color */
+  --primary: #8b1538;
+  --primary-foreground: #ffffff;
+  /* Enhanced secondary green to be more vibrant */
+  --secondary: #059669;
+  --secondary-foreground: #ffffff;
+  --muted: #fef7f0;
+  --muted-foreground: #374151;
+  /* Updated accent to use emerald green for modern feel */
+  --accent: #10b981;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #ffffff;
+  /* Updated ring color to match new primary */
+  --ring: #8b1538;
+  /* Updated chart colors to use burgundy and green theme */
+  --chart-1: #8b1538;
+  --chart-2: #059669;
+  --chart-3: #10b981;
+  --chart-4: #065f46;
+  --chart-5: #047857;
+  --radius: 0.5rem;
+  --sidebar: #fef7f0;
+  --sidebar-foreground: #374151;
+  /* Updated sidebar colors to match theme */
+  --sidebar-primary: #8b1538;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #059669;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #8b1538;
+}
+
+.dark {
+  --background: #1f2937;
+  --foreground: #f9fafb;
+  --card: #374151;
+  --card-foreground: #f9fafb;
+  --popover: #374151;
+  --popover-foreground: #f9fafb;
+  /* Updated dark mode primary to lighter burgundy */
+  --primary: #be185d;
+  --primary-foreground: #ffffff;
+  /* Updated dark mode secondary to brighter green */
+  --secondary: #10b981;
+  --secondary-foreground: #ffffff;
+  --muted: #4b5563;
+  --muted-foreground: #d1d5db;
+  /* Updated dark mode accent to emerald */
+  --accent: #34d399;
+  --accent-foreground: #ffffff;
+  --destructive: #f59e0b;
+  --destructive-foreground: #ffffff;
+  --border: #4b5563;
+  --input: #374151;
+  --ring: #be185d;
+  /* Updated dark mode chart colors */
+  --chart-1: #be185d;
+  --chart-2: #10b981;
+  --chart-3: #34d399;
+  --chart-4: #059669;
+  --chart-5: #047857;
+  --radius: 0.5rem;
+  --sidebar: #374151;
+  --sidebar-foreground: #f9fafb;
+  --sidebar-primary: #be185d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #10b981;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #4b5563;
+  --sidebar-ring: #be185d;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .musical-gradient {
+    background: linear-gradient(135deg, #8b1538 0%, #059669 100%);
+  }
+
+  .glass-effect {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .mobile-optimized {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .step-indicator {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .step-indicator.active {
+    @apply scale-110 shadow-lg;
+  }
+}
+
+@layer utilities {
+  .text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .heading-responsive {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+
+  .spacing-responsive {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+  }
+}
