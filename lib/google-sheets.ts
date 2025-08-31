@@ -1,3 +1,7 @@
+"use server"
+
+import { google } from "googleapis"
+
 interface FormSubmissionData {
   name: string
   phone: string
@@ -12,51 +16,88 @@ interface FormSubmissionData {
 
 export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ success: boolean; message: string }> {
   try {
-    const scriptUrl = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n")
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID
 
-    if (!scriptUrl) {
-      throw new Error("Google Script URL not configured")
+    if (!serviceAccountEmail || !privateKey || !spreadsheetId) {
+      throw new Error("Google Sheets credentials not configured")
     }
 
-    // Prepare data for Google Sheets
-    const sheetData = {
-      timestamp: new Date().toISOString(),
-      name: data.name,
-      phone: `${data.countryCode} ${data.phone}`,
-      email: data.email,
-      currency: data.currency,
-      selectedPack: data.selectedPack,
-      accompanimentPacks: JSON.stringify(data.accompanimentPacks),
-      comments: data.comments,
-      totalPrice: data.totalPrice,
-    }
+    const auth = new google.auth.JWT(serviceAccountEmail, undefined, privateKey, [
+      "https://www.googleapis.com/auth/spreadsheets",
+    ])
 
-    console.log("[v0] Sending data to Google Sheets:", sheetData)
+    const sheets = google.sheets({ version: "v4", auth })
 
-    const response = await fetch(scriptUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(sheetData),
+    const existingData = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Sheet1!A1:J1",
     })
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+    const hasHeaders = existingData.data.values && existingData.data.values.length > 0
+
+    if (!hasHeaders) {
+      const headers = [
+        "Date/Heure",
+        "Nom",
+        "Téléphone",
+        "Email",
+        "Devise",
+        "Pack Choisi",
+        "Packs d'Accompagnement",
+        "Commentaires",
+        "Prix Total (Numérique)",
+        "Prix Total (Formaté)",
+      ]
+
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: "Sheet1!A:J",
+        valueInputOption: "USER_ENTERED",
+        requestBody: {
+          values: [headers],
+        },
+      })
     }
 
-    const result = await response.json()
+    const accompanimentDetails = Object.entries(data.accompanimentPacks)
+      .filter(([_, quantity]) => quantity > 0)
+      .map(([packId, quantity]) => `${packId}: ${quantity}`)
+      .join(", ")
 
-    if (result.success) {
+    const rowData = [
+      new Date().toISOString(),
+      data.name,
+      `${data.countryCode} ${data.phone}`,
+      data.email,
+      data.currency,
+      data.selectedPack,
+      accompanimentDetails || "Aucun",
+      data.comments || "Aucun commentaire",
+      data.totalPrice,
+      `${data.totalPrice} ${data.currency}`,
+    ]
+
+    const response = await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: "Sheet1!A:J",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [rowData],
+      },
+    })
+
+    if (response.status === 200) {
       return {
         success: true,
         message: "Commande enregistrée avec succès dans Google Sheets!",
       }
     } else {
-      throw new Error(result.message || "Erreur lors de l'enregistrement")
+      throw new Error(`Google Sheets API error: ${response.status}`)
     }
   } catch (error) {
-    console.error("[v0] Google Sheets save error:", error)
+    console.error("Google Sheets save error:", error)
     return {
       success: false,
       message: "Erreur lors de l'enregistrement. Veuillez réessayer.",
