@@ -36,7 +36,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
 
     const existingData = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Commandes!A1:J1",
+      range: "Commandes!A1:P1",
     })
 
     const hasHeaders = existingData.data.values && existingData.data.values.length > 0
@@ -49,15 +49,21 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
         "Email",
         "Devise",
         "Pack Choisi",
-        "Packs d'Accompagnement",
+        "Pack Asaph",
+        "Pack Ethan 1",
+        "Pack Ethan 2",
+        "Pack Ethan 3",
+        "Pack Heman 1",
+        "Pack Heman 2",
+        "Pack Heman 3",
+        "Pack Heman 4",
         "Commentaires",
-        "Prix Total (Numérique)",
-        "Prix Total (Formaté)",
+        "Prix Total",
       ]
 
       await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: "Commandes!A:J",
+        range: "Commandes!A:P",
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: [headers],
@@ -65,10 +71,16 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
       })
     }
 
-    const accompanimentDetails = Object.entries(data.accompanimentPacks)
-      .filter(([_, quantity]) => quantity > 0)
-      .map(([packId, quantity]) => `${packId}: ${quantity}`)
-      .join(", ")
+    const accompanimentColumns = [
+      data.accompanimentPacks["asaph"] || 0,
+      data.accompanimentPacks["ethan1"] || 0,
+      data.accompanimentPacks["ethan2"] || 0,
+      data.accompanimentPacks["ethan3"] || 0,
+      data.accompanimentPacks["heman1"] || 0,
+      data.accompanimentPacks["heman2"] || 0,
+      data.accompanimentPacks["heman3"] || 0,
+      data.accompanimentPacks["heman4"] || 0,
+    ]
 
     const rowData = [
       new Date().toISOString(),
@@ -77,15 +89,14 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
       data.email,
       data.currency,
       data.selectedPack,
-      accompanimentDetails || "Aucun",
+      ...accompanimentColumns,
       data.comments || "Aucun commentaire",
-      data.totalPrice,
       `${data.totalPrice} ${data.currency}`,
     ]
 
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Commandes!A:J",
+      range: "Commandes!A:P",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [rowData],
