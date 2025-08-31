@@ -18,8 +18,8 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
   try {
     // Configuration des credentials Google
     const credentials = {
-      client_email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-      private_key: process.env.GOOGLE_SHEETS_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     }
     const spreadsheetId = process.env.GOOGLE_SHEET_ID
 
