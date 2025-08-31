@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { AlertCircle, Music, User, CreditCard, ChevronLeft, ChevronRight, Check, Piano, Mic } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
+import { saveToGoogleSheets } from "@/lib/google-sheets"
 
 interface FormData {
   name: string
@@ -134,7 +135,7 @@ const COUNTRIES = [
   { code: "+257", flag: "🇧🇮", name: "Burundi" },
   { code: "+258", flag: "🇲🇿", name: "Mozambique" },
   { code: "+260", flag: "🇿🇲", name: "Zambie" },
-  { code: "+263", flag: "🇿🇼", name: "Zimbabwe" },
+  { code: "+263", flag: "+🇿🇼", name: "Zimbabwe" },
   { code: "+267", flag: "🇧🇼", name: "Botswana" },
   { code: "+268", flag: "🇸🇿", name: "Eswatini" },
   { code: "+266", flag: "🇱🇸", name: "Lesotho" },
@@ -370,17 +371,9 @@ export function MultiStepOrderForm() {
         totalPrice: calculateTotal(),
       }
 
-      console.log("[v0] Submitting to Google Sheets:", submissionData)
+      console.log("[v0] Submitting directly to Google Sheets:", submissionData)
 
-      const response = await fetch("/api/submit-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      })
-
-      const result = await response.json()
+      const result = await saveToGoogleSheets(submissionData)
 
       if (result.success) {
         setSubmitMessage({ type: "success", text: result.message })
