@@ -288,6 +288,8 @@ const STEPS = [
 
 export function MultiStepOrderForm() {
   const [currentStep, setCurrentStep] = useState(1)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
@@ -358,10 +360,44 @@ export function MultiStepOrderForm() {
     }
   }
 
-  const handleSubmit = () => {
-    console.log("[v0] Form submitted:", formData)
-    console.log("[v0] Total price:", calculateTotal(), formData.currency)
-    alert("Commande soumise avec succès!")
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    setSubmitMessage(null)
+
+    try {
+      const submissionData = {
+        ...formData,
+        totalPrice: calculateTotal(),
+      }
+
+      console.log("[v0] Submitting to Google Sheets:", submissionData)
+
+      const response = await fetch("/api/submit-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setSubmitMessage({ type: "success", text: result.message })
+        console.log("[v0] Form submitted successfully to Google Sheets")
+      } else {
+        setSubmitMessage({ type: "error", text: result.message })
+        console.log("[v0] Form submission failed:", result.message)
+      }
+    } catch (error) {
+      console.error("[v0] Submission error:", error)
+      setSubmitMessage({
+        type: "error",
+        text: "Erreur de connexion. Veuillez réessayer.",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const renderStepContent = () => {
@@ -729,6 +765,22 @@ export function MultiStepOrderForm() {
                 </AlertDescription>
               </Alert>
 
+              {/* Submission Status Message */}
+              {submitMessage && (
+                <Alert
+                  className={`${submitMessage.type === "success" ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"}`}
+                >
+                  <AlertCircle
+                    className={`h-4 w-4 ${submitMessage.type === "success" ? "text-green-600" : "text-red-600"}`}
+                  />
+                  <AlertDescription
+                    className={`text-xs sm:text-sm ${submitMessage.type === "success" ? "text-green-800" : "text-red-800"}`}
+                  >
+                    {submitMessage.text}
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {/* Total Price */}
               <div className="border-2 border-primary rounded-lg p-4 sm:p-6 text-center musical-gradient text-white shadow-lg mt-4">
                 <h3 className="text-base sm:text-lg font-semibold mb-2">Prix total de la commande</h3>
@@ -737,8 +789,21 @@ export function MultiStepOrderForm() {
                 </p>
               </div>
 
-              <Button onClick={handleSubmit} size="lg" className="w-full text-responsive py-3 sm:py-4 mt-4 text-white">
-                Confirmer la commande
+              {/* Submit Button */}
+              <Button
+                onClick={handleSubmit}
+                size="lg"
+                className="w-full text-responsive py-3 sm:py-4 mt-4 text-white"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Enregistrement en cours...
+                  </>
+                ) : (
+                  "Confirmer la commande"
+                )}
               </Button>
             </CardContent>
           </Card>
