@@ -12,6 +12,7 @@ import { AlertCircle, Music, User, CreditCard, ChevronLeft, ChevronRight, Check,
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { saveToGoogleSheets } from "@/lib/google-sheets"
+import { useRouter } from "next/navigation"
 
 interface FormData {
   name: string
@@ -291,6 +292,7 @@ export function MultiStepOrderForm() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const router = useRouter()
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
@@ -376,8 +378,9 @@ export function MultiStepOrderForm() {
       const result = await saveToGoogleSheets(submissionData)
 
       if (result.success) {
-        setSubmitMessage({ type: "success", text: result.message })
-        console.log("[v0] Form submitted successfully to Google Sheets")
+        const totalPrice = calculateTotal()
+        router.push(`/success?total=${totalPrice}&currency=${formData.currency}`)
+        console.log("[v0] Form submitted successfully, redirecting to success page")
       } else {
         setSubmitMessage({ type: "error", text: result.message })
         console.log("[v0] Form submission failed:", result.message)
@@ -757,22 +760,6 @@ export function MultiStepOrderForm() {
                   retenue).
                 </AlertDescription>
               </Alert>
-
-              {/* Submission Status Message */}
-              {submitMessage && (
-                <Alert
-                  className={`${submitMessage.type === "success" ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"}`}
-                >
-                  <AlertCircle
-                    className={`h-4 w-4 ${submitMessage.type === "success" ? "text-green-600" : "text-red-600"}`}
-                  />
-                  <AlertDescription
-                    className={`text-xs sm:text-sm ${submitMessage.type === "success" ? "text-green-800" : "text-red-800"}`}
-                  >
-                    {submitMessage.text}
-                  </AlertDescription>
-                </Alert>
-              )}
 
               {/* Total Price */}
               <div className="border-2 border-primary rounded-lg p-4 sm:p-6 text-center musical-gradient text-white shadow-lg mt-4">
