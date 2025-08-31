@@ -16,23 +16,27 @@ interface FormSubmissionData {
 
 export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ success: boolean; message: string }> {
   try {
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n")
+    // Configuration des credentials Google
+    const credentials = {
+      client_email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+      private_key: process.env.GOOGLE_SHEETS_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    }
     const spreadsheetId = process.env.GOOGLE_SHEET_ID
 
-    if (!serviceAccountEmail || !privateKey || !spreadsheetId) {
+    if (!credentials.client_email || !credentials.private_key || !spreadsheetId) {
       throw new Error("Google Sheets credentials not configured")
     }
 
-    const auth = new google.auth.JWT(serviceAccountEmail, undefined, privateKey, [
-      "https://www.googleapis.com/auth/spreadsheets",
-    ])
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    })
 
     const sheets = google.sheets({ version: "v4", auth })
 
     const existingData = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Sheet1!A1:J1",
+      range: "Commandes!A1:J1",
     })
 
     const hasHeaders = existingData.data.values && existingData.data.values.length > 0
@@ -53,7 +57,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
 
       await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: "Sheet1!A:J",
+        range: "Commandes!A:J",
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: [headers],
@@ -81,7 +85,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
 
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Sheet1!A:J",
+      range: "Commandes!A:J",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [rowData],
