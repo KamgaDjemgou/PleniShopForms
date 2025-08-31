@@ -40,7 +40,6 @@ export default function SuccessPage() {
             <h3 className="text-lg font-semibold text-green-800 mb-3">Que se passe-t-il maintenant ?</h3>
             <div className="text-sm text-green-700 space-y-2 text-left">
               <p>✅ Votre commande a été enregistrée dans notre système</p>
-              <p>✅ Vous recevrez un email de confirmation sous peu</p>
               <p>✅ Notre équipe PLENISOFTS vous contactera pour finaliser votre abonnement</p>
               <p>✅ Vous aurez accès à vos packs selon les modalités choisies</p>
             </div>
@@ -61,13 +60,6 @@ export default function SuccessPage() {
               <Link href="/" className="flex items-center justify-center gap-2">
                 <RotateCcw className="h-4 w-4" />
                 Nouvelle Réservation
-              </Link>
-            </Button>
-
-            <Button asChild variant="outline" className="flex-1 bg-transparent" size="lg">
-              <Link href="/" className="flex items-center justify-center gap-2">
-                <Home className="h-4 w-4" />
-                Retour à l'accueil
               </Link>
             </Button>
           </div>
