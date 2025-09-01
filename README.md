@@ -1,4 +1,4 @@
-# Chant and instrument form
+# PleniHarmony Forms
 
 *Automatically synced with your [v0.app](https://v0.app) deployments*
 
