@@ -5,10 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { AlertCircle, Music, User, CreditCard, ChevronLeft, ChevronRight, Check, Piano, Mic } from "lucide-react"
+import {
+  AlertCircle,
+  Music,
+  User,
+  CreditCard,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Piano,
+  Mic,
+  Wallet,
+} from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { saveToGoogleSheets } from "@/lib/google-sheets"
@@ -22,6 +32,8 @@ interface FormData {
   selectedPack: string
   accompanimentPacks: { [key: string]: number }
   comments: string
+  paymentFrequency: "monthly" | "quarterly" | "biannual" | "annual"
+  paymentMethod: "bank" | "mobile" | "paypal"
 }
 
 const PACKS = [
@@ -139,8 +151,9 @@ const STEPS = [
   { id: 1, title: "Informations", icon: User },
   { id: 2, title: "Pack principal", icon: Music },
   { id: 3, title: "Pack(s) d'accompagnement", icon: Piano },
-  { id: 4, title: "Commentaires", icon: Mic },
-  { id: 5, title: "Récapitulatif", icon: CreditCard },
+  { id: 4, title: "Paiement", icon: Wallet },
+  { id: 5, title: "Commentaires", icon: Mic },
+  { id: 6, title: "Récapitulatif", icon: CreditCard },
 ]
 
 export function MultiStepOrderForm() {
@@ -156,29 +169,62 @@ export function MultiStepOrderForm() {
     selectedPack: "",
     accompanimentPacks: {},
     comments: "",
+    paymentFrequency: "monthly",
+    paymentMethod: "bank",
   })
 
   const calculateTotal = () => {
-    let total = 0
+    let mainPackTotal = 0
+    let accompanimentTotal = 0
 
-    // Add selected pack price
     if (formData.selectedPack) {
       const pack = PACKS.find((p) => p.id === formData.selectedPack)
-      if (pack) {
-        total += formData.currency === "EUR" ? pack.priceEUR : pack.priceFCFA
+      if (pack && pack.priceEUR > 0) {
+        const basePrice = formData.currency === "EUR" ? pack.priceEUR : pack.priceFCFA
+        const frequencyMultiplier = getFrequencyMultiplier(formData.paymentFrequency)
+        mainPackTotal = basePrice * frequencyMultiplier
       }
     }
 
-    // Add accompaniment packs
     Object.entries(formData.accompanimentPacks).forEach(([packId, quantity]) => {
       const pack = ACCOMPANIMENT_PACKS.find((p) => p.id === packId)
       if (pack && quantity > 0) {
         const price = formData.currency === "EUR" ? pack.priceEUR : pack.priceFCFA
-        total += price * quantity
+        accompanimentTotal += price * quantity
       }
     })
 
-    return total
+    return { mainPackTotal, accompanimentTotal, total: mainPackTotal + accompanimentTotal }
+  }
+
+  const getFrequencyMultiplier = (frequency: string) => {
+    switch (frequency) {
+      case "monthly":
+        return 1
+      case "quarterly":
+        return 3
+      case "biannual":
+        return 6
+      case "annual":
+        return 12
+      default:
+        return 1
+    }
+  }
+
+  const getFrequencyLabel = (frequency: string) => {
+    switch (frequency) {
+      case "monthly":
+        return "Mensuelle"
+      case "quarterly":
+        return "Trimestrielle"
+      case "biannual":
+        return "Semestrielle"
+      case "annual":
+        return "Annuelle"
+      default:
+        return "Mensuelle"
+    }
   }
 
   const updateAccompanimentQuantity = (packId: string, quantity: number) => {
@@ -199,6 +245,7 @@ export function MultiStepOrderForm() {
         return formData.selectedPack
       case 3:
       case 4:
+      case 5:
         return true
       default:
         return false
@@ -224,7 +271,7 @@ export function MultiStepOrderForm() {
     try {
       const submissionData = {
         ...formData,
-        totalPrice: calculateTotal(),
+        totalPrice: calculateTotal().total,
       }
 
       console.log("[v0] Submitting directly to Google Sheets:", submissionData)
@@ -232,7 +279,7 @@ export function MultiStepOrderForm() {
       const result = await saveToGoogleSheets(submissionData)
 
       if (result.success) {
-        const totalPrice = calculateTotal()
+        const totalPrice = calculateTotal().total
         router.push(`/success?total=${totalPrice}&currency=${formData.currency}`)
         console.log("[v0] Form submitted successfully, redirecting to success page")
       } else {
@@ -459,6 +506,147 @@ export function MultiStepOrderForm() {
           <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 heading-responsive">
+                <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
+                Options de Paiement
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="spacing-responsive">
+              {formData.selectedPack && PACKS.find((p) => p.id === formData.selectedPack)?.priceEUR > 0 && (
+                <div>
+                  <Label className="text-responsive font-semibold">
+                    Fréquence de paiement (Pack principal uniquement)
+                  </Label>
+                  <RadioGroup
+                    value={formData.paymentFrequency}
+                    onValueChange={(value: "monthly" | "quarterly" | "biannual" | "annual") =>
+                      setFormData((prev) => ({ ...prev, paymentFrequency: value }))
+                    }
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3"
+                  >
+                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors">
+                      <RadioGroupItem value="monthly" id="monthly" />
+                      <Label htmlFor="monthly" className="text-responsive cursor-pointer">
+                        Mensuelle
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors">
+                      <RadioGroupItem value="quarterly" id="quarterly" />
+                      <Label htmlFor="quarterly" className="text-responsive cursor-pointer">
+                        Trimestrielle
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors">
+                      <RadioGroupItem value="biannual" id="biannual" />
+                      <Label htmlFor="biannual" className="text-responsive cursor-pointer">
+                        Semestrielle
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors">
+                      <RadioGroupItem value="annual" id="annual" />
+                      <Label htmlFor="annual" className="text-responsive cursor-pointer">
+                        Annuelle
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              )}
+
+              <div>
+                <Label className="text-responsive font-semibold">Moyen de paiement</Label>
+                <RadioGroup
+                  value={formData.paymentMethod}
+                  onValueChange={(value: "bank" | "mobile" | "paypal") =>
+                    setFormData((prev) => ({ ...prev, paymentMethod: value }))
+                  }
+                  className="space-y-4 mt-3"
+                >
+                  <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <RadioGroupItem value="bank" id="bank" />
+                      <Label htmlFor="bank" className="text-responsive cursor-pointer font-medium">
+                        🏦 Par Virement / Versement / Transfert (RIA, MoneyGram, WU)
+                      </Label>
+                    </div>
+                    {formData.paymentMethod === "bank" && (
+                      <div className="ml-6 space-y-2 text-xs sm:text-sm bg-muted/30 p-3 rounded">
+                        <p>
+                          <strong>IBAN:</strong> MA64 013 780 0117320100800123 48
+                        </p>
+                        <p>
+                          <strong>RIB:</strong> 013 780 0117320100800123 48
+                        </p>
+                        <p>
+                          <strong>Code SWIFT:</strong> BMCIMAMC
+                        </p>
+                        <p>
+                          <strong>Titulaire:</strong> DOGBRE SOKORA JEAN-CHRISTOPHE
+                        </p>
+                        <p>
+                          <strong>Adresse:</strong> Casablanca, Maroc
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <RadioGroupItem value="mobile" id="mobile" />
+                      <Label htmlFor="mobile" className="text-responsive cursor-pointer font-medium">
+                        📱 Par Mobile Money
+                      </Label>
+                    </div>
+                    {formData.paymentMethod === "mobile" && (
+                      <div className="ml-6 space-y-2 text-xs sm:text-sm bg-muted/30 p-3 rounded">
+                        <p>
+                          <strong>🇨🇮 Côte d'Ivoire (Orange / Wave):</strong> +2250703833108
+                        </p>
+                        <p>
+                          <strong>🇧🇫 Burkina Faso (Orange):</strong> +22654725339
+                        </p>
+                        <p>
+                          <strong>🇸🇳 Sénégal (Orange / Wave):</strong> +221775091447
+                        </p>
+                        <p>
+                          <strong>🇬🇦 Gabon (Airtel):</strong> +24160271771
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <RadioGroupItem value="paypal" id="paypal" />
+                      <Label htmlFor="paypal" className="text-responsive cursor-pointer font-medium">
+                        💳 Par PayPal
+                      </Label>
+                    </div>
+                    {formData.paymentMethod === "paypal" && (
+                      <div className="ml-6 text-xs sm:text-sm bg-muted/30 p-3 rounded">
+                        <p>
+                          <strong>Lien:</strong>{" "}
+                          <a
+                            href="https://paypal.me/chadahmusic"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            paypal.me/chadahmusic
+                          </a>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </RadioGroup>
+              </div>
+            </CardContent>
+          </Card>
+        )
+
+      case 5:
+        return (
+          <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 heading-responsive">
                 <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
                 Commentaires et Suggestions
               </CardTitle>
@@ -481,7 +669,8 @@ export function MultiStepOrderForm() {
           </Card>
         )
 
-      case 5:
+      case 6:
+        const totals = calculateTotal()
         return (
           <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
             <CardHeader className="pb-4">
@@ -491,7 +680,6 @@ export function MultiStepOrderForm() {
               </CardTitle>
             </CardHeader>
             <CardContent className="spacing-responsive">
-              {/* Personal Info Summary */}
               <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-accent/20">
                 <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
                   <User className="h-4 w-4 text-accent" />
@@ -502,7 +690,7 @@ export function MultiStepOrderForm() {
                     <strong>Nom:</strong> {formData.name}
                   </p>
                   <p>
-                    <strong>Téléphone:</strong>{formData.phone}
+                    <strong>Téléphone:</strong> {formData.phone}
                   </p>
                   <p>
                     <strong>Email:</strong> {formData.email}
@@ -513,7 +701,6 @@ export function MultiStepOrderForm() {
                 </div>
               </div>
 
-              {/* Selected Pack */}
               {formData.selectedPack && (
                 <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-primary/20">
                   <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
@@ -523,23 +710,28 @@ export function MultiStepOrderForm() {
                   {(() => {
                     const pack = PACKS.find((p) => p.id === formData.selectedPack)
                     return pack ? (
-                      <div className="text-xs sm:text-sm">
+                      <div className="text-xs sm:text-sm space-y-2">
                         <p>
                           <strong>{pack.name}</strong>
                         </p>
                         <p className="text-muted-foreground text-pretty">{pack.description}</p>
-                        <p className="text-primary font-semibold">
-                          {pack.priceEUR === 0
-                            ? "Gratuit"
-                            : `${formData.currency === "EUR" ? pack.priceEUR + " EUR" : pack.priceFCFA.toLocaleString() + " FCFA"}${pack.monthly ? " / mois" : ""}`}
-                        </p>
+                        {pack.priceEUR > 0 && (
+                          <>
+                            <p>
+                              <strong>Fréquence:</strong> {getFrequencyLabel(formData.paymentFrequency)}
+                            </p>
+                            <p className="text-primary font-semibold">
+                              Total: {totals.mainPackTotal.toLocaleString()} {formData.currency}
+                            </p>
+                          </>
+                        )}
+                        {pack.priceEUR === 0 && <p className="text-primary font-semibold">Gratuit</p>}
                       </div>
                     ) : null
                   })()}
                 </div>
               )}
 
-              {/* Accompaniment Packs */}
               {Object.entries(formData.accompanimentPacks).some(([_, qty]) => qty > 0) && (
                 <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-secondary/20">
                   <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
@@ -569,11 +761,37 @@ export function MultiStepOrderForm() {
                         </div>
                       )
                     })}
+                    <div className="border-t pt-2 mt-2">
+                      <p className="text-secondary font-semibold text-right">
+                        Total accompagnement: {totals.accompanimentTotal.toLocaleString()} {formData.currency}
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Comments */}
+              <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-accent/20">
+                <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
+                  <Wallet className="h-4 w-4 text-accent" />
+                  Informations de paiement
+                </h3>
+                <div className="text-xs sm:text-sm space-y-1">
+                  {formData.selectedPack && PACKS.find((p) => p.id === formData.selectedPack)?.priceEUR > 0 && (
+                    <p>
+                      <strong>Fréquence:</strong> {getFrequencyLabel(formData.paymentFrequency)}
+                    </p>
+                  )}
+                  <p>
+                    <strong>Moyen de paiement:</strong>{" "}
+                    {formData.paymentMethod === "bank"
+                      ? "Virement / Transfert"
+                      : formData.paymentMethod === "mobile"
+                        ? "Mobile Money"
+                        : "PayPal"}
+                  </p>
+                </div>
+              </div>
+
               {formData.comments && (
                 <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-accent/20">
                   <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
@@ -584,7 +802,6 @@ export function MultiStepOrderForm() {
                 </div>
               )}
 
-              {/* Important Note */}
               <Alert className="border-accent/30 bg-accent/5 mt-4">
                 <AlertCircle className="h-4 w-4 text-accent" />
                 <AlertDescription className="text-xs sm:text-sm">
@@ -592,23 +809,31 @@ export function MultiStepOrderForm() {
                   <br />
                   Vous avez la possibilité une fois abonné(e) de :
                   <br />• soit demander une harmonisation (voix) ou une instrumentation (instrument piano ou guitare ou
-                  bass ou batterie) d'un chant donné à PLENISOFTS {formData.currency==="FCFA" ? "10.000 FCFA" : "20 EUR"} si votre proposition est
-                  retenue).
+                  bass ou batterie) d'un chant donné à PLENISOFTS{" "}
+                  {formData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"} si votre proposition est retenue).
                   <br />• soit proposer à PLENISOFTS votre propre harmonisation ou instrumentation pour enrichir la base
-                  de chants (dans ce cas, PLENISOFTS vous paiera {formData.currency==="FCFA" ? "10.000 FCFA" : "20 EUR"} si votre proposition est
-                  retenue).
+                  de chants (dans ce cas, PLENISOFTS vous paiera{" "}
+                  {formData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"} si votre proposition est retenue).
                 </AlertDescription>
               </Alert>
 
-              {/* Total Price */}
               <div className="border-2 border-primary rounded-lg p-4 sm:p-6 text-center musical-gradient text-white shadow-lg mt-4">
                 <h3 className="text-base sm:text-lg font-semibold mb-2">Prix total de la commande</h3>
-                <p className="text-2xl sm:text-3xl md:text-4xl font-bold">
-                  {calculateTotal().toLocaleString()} {formData.currency}
+                {totals.mainPackTotal > 0 && (
+                  <p className="text-sm opacity-90">
+                    Pack principal: {totals.mainPackTotal.toLocaleString()} {formData.currency}
+                  </p>
+                )}
+                {totals.accompanimentTotal > 0 && (
+                  <p className="text-sm opacity-90">
+                    Accompagnement: {totals.accompanimentTotal.toLocaleString()} {formData.currency}
+                  </p>
+                )}
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2">
+                  {totals.total.toLocaleString()} {formData.currency}
                 </p>
               </div>
 
-              {/* Submit Button */}
               <Button
                 onClick={handleSubmit}
                 size="lg"
@@ -635,7 +860,6 @@ export function MultiStepOrderForm() {
 
   return (
     <div className="spacing-responsive">
-      {/* Progress Steps */}
       <div className="bg-card/70 backdrop-blur-sm rounded-lg p-3 sm:p-6 shadow-lg border border-accent/20">
         <div className="flex items-center justify-between mb-4 overflow-x-auto pb-2">
           {STEPS.map((step, index) => {
@@ -682,10 +906,8 @@ export function MultiStepOrderForm() {
         <Progress value={(currentStep / STEPS.length) * 100} className="h-2 bg-muted" />
       </div>
 
-      {/* Step Content */}
       <div className="min-h-[400px] sm:min-h-[500px]">{renderStepContent()}</div>
 
-      {/* Navigation Buttons */}
       <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
         <Button
           variant="outline"
