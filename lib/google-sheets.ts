@@ -85,7 +85,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
     const rowData = [
       new Date().toISOString(),
       data.name,
-      `${data.countryCode} ${data.phone}`,
+      data.phone,
       data.email,
       data.currency,
       data.selectedPack,
