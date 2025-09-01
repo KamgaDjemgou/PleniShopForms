@@ -31,10 +31,10 @@ export default function SuccessPage() {
                 <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg border border-primary/20">
                   <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
                     <Music className="h-5 w-5 text-primary" />
-                    Pack Principal {frequency && `(${frequency})`}
+                    Pack Principal
                   </h3>
                   <p className="text-3xl font-bold text-primary">
-                    {Number.parseInt(mainPackTotal).toLocaleString()} {currency}
+                    {Number.parseInt(mainPackTotal).toLocaleString()} {currency} {frequency && `${frequency}`}
                   </p>
                 </div>
               )}
