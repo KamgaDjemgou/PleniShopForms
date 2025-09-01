@@ -227,6 +227,21 @@ export function MultiStepOrderForm() {
     }
   }
 
+  const getPaymentFrequencyLabel = (frequency: string) => {
+    switch (frequency) {
+      case "monthly":
+        return "/mois"
+      case "quarterly":
+        return "/trimestre"
+      case "biannual":
+        return "/semestre"
+      case "annual":
+        return "/an"
+      default:
+        return "/mois"
+    }
+  }
+
   const updateAccompanimentQuantity = (packId: string, quantity: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -287,7 +302,7 @@ export function MultiStepOrderForm() {
           currency: formData.currency,
           mainPackTotal: totals.mainPackTotal.toString(),
           accompanimentTotal: totals.accompanimentTotal.toString(),
-          frequency: getFrequencyLabel(formData.paymentFrequency),
+          frequency: getPaymentFrequencyLabel(formData.paymentFrequency),
         })
         router.push(`/success?${params.toString()}`)
         console.log("[v0] Form submitted successfully, redirecting to success page")
@@ -730,7 +745,7 @@ export function MultiStepOrderForm() {
                               <strong>Fréquence:</strong> {getFrequencyLabel(formData.paymentFrequency)}
                             </p>
                             <p className="text-primary font-semibold">
-                              Total: {totals.mainPackTotal.toLocaleString()} {formData.currency}
+                              Total: {totals.mainPackTotal.toLocaleString()} {formData.currency} {getPaymentFrequencyLabel(formData.paymentFrequency)}
                             </p>
                           </>
                         )}
@@ -830,9 +845,8 @@ export function MultiStepOrderForm() {
                 {totals.mainPackTotal > 0 && (
                   <div className="border-2 border-primary rounded-lg p-4 sm:p-6 text-center musical-gradient text-white shadow-lg">
                     <h3 className="text-base sm:text-lg font-semibold mb-2">Pack Principal</h3>
-                    <p className="text-sm opacity-90">{getFrequencyLabel(formData.paymentFrequency)}</p>
                     <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2">
-                      {totals.mainPackTotal.toLocaleString()} {formData.currency}
+                      {totals.mainPackTotal.toLocaleString()} {formData.currency} {getPaymentFrequencyLabel(formData.paymentFrequency)}
                     </p>
                   </div>
                 )}
