@@ -182,7 +182,7 @@ const PACKS = [
   {
     id: "ekklesia1",
     name: "Pack Ekklesia 1",
-    description: "Tous les chants harmonisés/orchestrés, groupe 1 à 10 personnes",
+    description: "Tous les chants harmonisés/orchestrés, groupe de 1 à 10 personnes",
     priceEUR: 100,
     priceFCFA: 50000,
     monthly: true,
@@ -190,7 +190,7 @@ const PACKS = [
   {
     id: "ekklesia2",
     name: "Pack Ekklesia 2",
-    description: "Tous les chants harmonisés/orchestrés, groupe 11 à 50 personnes",
+    description: "Tous les chants harmonisés/orchestrés, groupe de 11 à 50 personnes",
     priceEUR: 200,
     priceFCFA: 100000,
     monthly: true,
@@ -198,7 +198,7 @@ const PACKS = [
   {
     id: "ekklesia3",
     name: "Pack Ekklesia 3",
-    description: "Tous les chants harmonisés/orchestrés, groupe 51 à 100 personnes",
+    description: "Tous les chants harmonisés/orchestrés, groupe de 51 à 100 personnes",
     priceEUR: 300,
     priceFCFA: 150000,
     monthly: true,
@@ -206,7 +206,7 @@ const PACKS = [
   {
     id: "ekklesia4",
     name: "Pack Ekklesia 4",
-    description: "Tous les chants harmonisés/orchestrés, groupe >100 personnes",
+    description: "Tous les chants harmonisés/orchestrés, groupe de plus de 100 personnes",
     priceEUR: 300,
     priceFCFA: 200000,
     monthly: true,
@@ -282,8 +282,8 @@ const ACCOMPANIMENT_PACKS = [
 
 const STEPS = [
   { id: 1, title: "Informations", icon: User },
-  { id: 2, title: "Packs principaux", icon: Music },
-  { id: 3, title: "Accompagnement", icon: Piano },
+  { id: 2, title: "Pack principal", icon: Music },
+  { id: 3, title: "Pack(s) d'accompagnement", icon: Piano },
   { id: 4, title: "Commentaires", icon: Mic },
   { id: 5, title: "Récapitulatif", icon: CreditCard },
 ]
@@ -479,13 +479,13 @@ export function MultiStepOrderForm() {
                   <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors">
                     <RadioGroupItem value="EUR" id="eur" />
                     <Label htmlFor="eur" className="text-responsive cursor-pointer">
-                      🇪🇺 EUR (Europe)
+                      🇪🇺 EUR
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 p-3 rounded-lg border border-secondary/20 hover:bg-secondary/10 transition-colors">
                     <RadioGroupItem value="FCFA" id="fcfa" />
                     <Label htmlFor="fcfa" className="text-responsive cursor-pointer">
-                      🌍 FCFA (Afrique)
+                      🌍 FCFA
                     </Label>
                   </div>
                 </RadioGroup>

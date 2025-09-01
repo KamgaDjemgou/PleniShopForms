@@ -17,7 +17,7 @@ export default function Home() {
                 priority
               />
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2 text-balance">PLENISOFTS</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2 text-balance">PLENIHARMONY</h1>
             <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-4 text-pretty max-w-2xl mx-auto">
               Plateforme d'apprentissage du chant et d'accompagnement aux instruments
             </p>
@@ -25,15 +25,15 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 text-primary/70 mb-6 max-w-lg sm:max-w-none mx-auto">
               <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors">
                 <span className="text-xl sm:text-2xl">🎵</span>
-                <span className="text-xs sm:text-sm font-medium text-accent">Chants harmonisés</span>
-              </div>
-              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-secondary/10 border border-secondary/20 hover:bg-secondary/20 transition-colors">
-                <span className="text-xl sm:text-2xl">🎹</span>
-                <span className="text-xs sm:text-sm font-medium text-secondary">Accompagnement</span>
+                <span className="text-xs sm:text-sm font-medium text-accent">Harmonisation</span>
               </div>
               <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors">
+                <span className="text-xl sm:text-2xl">🎹</span>
+                <span className="text-xs sm:text-sm font-medium text-primary">Instruments</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-secondary/10 border border-secondary/20 hover:bg-secondary/20 transition-colors">
                 <span className="text-xl sm:text-2xl">🎤</span>
-                <span className="text-xs sm:text-sm font-medium text-primary">Formation vocale</span>
+                <span className="text-xs sm:text-sm font-medium text-secondary">Voix</span>
               </div>
             </div>
 

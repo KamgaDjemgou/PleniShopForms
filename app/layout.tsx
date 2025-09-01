@@ -10,9 +10,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Reservation PleniHarmony",
-  description: "Formulaire de commande pour les services de chant et d'accompagnement musical - PleniSofts",
-  generator: "PleniSofts",
+  title: "Commande PleniHarmony",
+  description: "Formulaire de commande pour les services de chant et d'accompagnement musical - PleniHarmony",
+  generator: "PleniHarmony",
   icons: {
     icon: "/images/plenisofts-logo.png",
     shortcut: "/images/plenisofts-logo.png",

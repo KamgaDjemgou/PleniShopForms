@@ -59,7 +59,7 @@ export default function SuccessPage() {
             <Button asChild className="flex-1" size="lg">
               <Link href="/" className="flex items-center justify-center gap-2">
                 <RotateCcw className="h-4 w-4" />
-                Nouvelle Réservation
+                Nouvelle Commande
               </Link>
             </Button>
           </div>
