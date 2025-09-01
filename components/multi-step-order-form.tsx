@@ -269,9 +269,12 @@ export function MultiStepOrderForm() {
     setSubmitMessage(null)
 
     try {
+      const totals = calculateTotal()
       const submissionData = {
         ...formData,
-        totalPrice: calculateTotal().total,
+        totalPrice: totals.total,
+        paymentFrequency: formData.paymentFrequency,
+        paymentMethod: formData.paymentMethod,
       }
 
       console.log("[v0] Submitting directly to Google Sheets:", submissionData)
@@ -279,8 +282,14 @@ export function MultiStepOrderForm() {
       const result = await saveToGoogleSheets(submissionData)
 
       if (result.success) {
-        const totalPrice = calculateTotal().total
-        router.push(`/success?total=${totalPrice}&currency=${formData.currency}`)
+        const params = new URLSearchParams({
+          total: totals.total.toString(),
+          currency: formData.currency,
+          mainPackTotal: totals.mainPackTotal.toString(),
+          accompanimentTotal: totals.accompanimentTotal.toString(),
+          frequency: getFrequencyLabel(formData.paymentFrequency),
+        })
+        router.push(`/success?${params.toString()}`)
         console.log("[v0] Form submitted successfully, redirecting to success page")
       } else {
         setSubmitMessage({ type: "error", text: result.message })
@@ -362,13 +371,13 @@ export function MultiStepOrderForm() {
                   onValueChange={(value: "EUR" | "FCFA") => setFormData((prev) => ({ ...prev, currency: value }))}
                   className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-2"
                 >
-                  <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors">
+                  <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors border-l-4 border-l-accent/50">
                     <RadioGroupItem value="EUR" id="eur" />
                     <Label htmlFor="eur" className="text-responsive cursor-pointer">
                       🇪🇺 EUR
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-2 p-3 rounded-lg border border-secondary/20 hover:bg-secondary/10 transition-colors">
+                  <div className="flex items-center space-x-2 p-3 rounded-lg border border-secondary/20 hover:bg-secondary/10 transition-colors border-l-4 border-l-secondary/50">
                     <RadioGroupItem value="FCFA" id="fcfa" />
                     <Label htmlFor="fcfa" className="text-responsive cursor-pointer">
                       🌍 FCFA
@@ -817,21 +826,25 @@ export function MultiStepOrderForm() {
                 </AlertDescription>
               </Alert>
 
-              <div className="border-2 border-primary rounded-lg p-4 sm:p-6 text-center musical-gradient text-white shadow-lg mt-4">
-                <h3 className="text-base sm:text-lg font-semibold mb-2">Prix total de la commande</h3>
+              <div className="space-y-4 mt-4">
                 {totals.mainPackTotal > 0 && (
-                  <p className="text-sm opacity-90">
-                    Pack principal: {totals.mainPackTotal.toLocaleString()} {formData.currency}
-                  </p>
+                  <div className="border-2 border-primary rounded-lg p-4 sm:p-6 text-center musical-gradient text-white shadow-lg">
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">Pack Principal</h3>
+                    <p className="text-sm opacity-90">{getFrequencyLabel(formData.paymentFrequency)}</p>
+                    <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2">
+                      {totals.mainPackTotal.toLocaleString()} {formData.currency}
+                    </p>
+                  </div>
                 )}
+
                 {totals.accompanimentTotal > 0 && (
-                  <p className="text-sm opacity-90">
-                    Accompagnement: {totals.accompanimentTotal.toLocaleString()} {formData.currency}
-                  </p>
+                  <div className="border-2 border-secondary rounded-lg p-4 sm:p-6 text-center bg-gradient-to-br from-secondary/20 to-secondary/10 shadow-lg">
+                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-secondary">Packs d'Accompagnement</h3>
+                    <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2 text-secondary">
+                      {totals.accompanimentTotal.toLocaleString()} {formData.currency}
+                    </p>
+                  </div>
                 )}
-                <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2">
-                  {totals.total.toLocaleString()} {formData.currency}
-                </p>
               </div>
 
               <Button

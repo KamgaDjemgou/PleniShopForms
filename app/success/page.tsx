@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, Music, RotateCcw, Home } from "lucide-react"
+import { CheckCircle, Music, RotateCcw, Piano } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
@@ -9,6 +9,9 @@ export default function SuccessPage() {
   const searchParams = useSearchParams()
   const orderTotal = searchParams.get("total")
   const currency = searchParams.get("currency")
+  const mainPackTotal = searchParams.get("mainPackTotal")
+  const accompanimentTotal = searchParams.get("accompanimentTotal")
+  const frequency = searchParams.get("frequency")
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
@@ -22,16 +25,31 @@ export default function SuccessPage() {
         </CardHeader>
 
         <CardContent className="space-y-6 text-center">
-          {/* Order Summary */}
           {orderTotal && currency && (
-            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 rounded-lg border border-primary/20">
-              <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
-                <Music className="h-5 w-5 text-primary" />
-                Montant total
-              </h3>
-              <p className="text-3xl font-bold text-primary">
-                {Number.parseInt(orderTotal).toLocaleString()} {currency}
-              </p>
+            <div className="space-y-4">
+              {mainPackTotal && Number.parseInt(mainPackTotal) > 0 && (
+                <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg border border-primary/20">
+                  <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
+                    <Music className="h-5 w-5 text-primary" />
+                    Pack Principal {frequency && `(${frequency})`}
+                  </h3>
+                  <p className="text-3xl font-bold text-primary">
+                    {Number.parseInt(mainPackTotal).toLocaleString()} {currency}
+                  </p>
+                </div>
+              )}
+
+              {accompanimentTotal && Number.parseInt(accompanimentTotal) > 0 && (
+                <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 p-6 rounded-lg border border-secondary/20">
+                  <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
+                    <Piano className="h-5 w-5 text-secondary" />
+                    Packs d'Accompagnement
+                  </h3>
+                  <p className="text-3xl font-bold text-secondary">
+                    {Number.parseInt(accompanimentTotal).toLocaleString()} {currency}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
