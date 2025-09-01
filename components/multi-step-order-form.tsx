@@ -17,157 +17,12 @@ import { useRouter } from "next/navigation"
 interface FormData {
   name: string
   phone: string
-  countryCode: string
   email: string
   currency: "EUR" | "FCFA"
   selectedPack: string
   accompanimentPacks: { [key: string]: number }
   comments: string
 }
-
-const COUNTRIES = [
-  { code: "(1)", flag: "🇺🇸", name: "États-Unis" },
-  { code: "(1)", flag: "🇨🇦", name: "Canada" },
-  { code: "(33)", flag: "🇫🇷", name: "France" },
-  { code: "(49)", flag: "🇩🇪", name: "Allemagne" },
-  { code: "(44)", flag: "🇬🇧", name: "Royaume-Uni" },
-  { code: "(39)", flag: "🇮🇹", name: "Italie" },
-  { code: "(34)", flag: "🇪🇸", name: "Espagne" },
-  { code: "(31)", flag: "🇳🇱", name: "Pays-Bas" },
-  { code: "(32)", flag: "🇧🇪", name: "Belgique" },
-  { code: "(41)", flag: "🇨🇭", name: "Suisse" },
-  { code: "(43)", flag: "🇦🇹", name: "Autriche" },
-  { code: "(45)", flag: "🇩🇰", name: "Danemark" },
-  { code: "(46)", flag: "🇸🇪", name: "Suède" },
-  { code: "(47)", flag: "🇳🇴", name: "Norvège" },
-  { code: "(358)", flag: "🇫🇮", name: "Finlande" },
-  { code: "(351)", flag: "🇵🇹", name: "Portugal" },
-  { code: "(30)", flag: "🇬🇷", name: "Grèce" },
-  { code: "(48)", flag: "🇵🇱", name: "Pologne" },
-  { code: "(420)", flag: "🇨🇿", name: "République tchèque" },
-  { code: "(36)", flag: "🇭🇺", name: "Hongrie" },
-  { code: "(40)", flag: "🇷🇴", name: "Roumanie" },
-  { code: "(359)", flag: "🇧🇬", name: "Bulgarie" },
-  { code: "(385)", flag: "🇭🇷", name: "Croatie" },
-  { code: "(386)", flag: "🇸🇮", name: "Slovénie" },
-  { code: "(421)", flag: "🇸🇰", name: "Slovaquie" },
-  { code: "(372)", flag: "🇪🇪", name: "Estonie" },
-  { code: "(371)", flag: "🇱🇻", name: "Lettonie" },
-  { code: "(370)", flag: "🇱🇹", name: "Lituanie" },
-  { code: "(7)", flag: "🇷🇺", name: "Russie" },
-  { code: "(380)", flag: "🇺🇦", name: "Ukraine" },
-  { code: "(375)", flag: "🇧🇾", name: "Biélorussie" },
-  { code: "(373)", flag: "🇲🇩", name: "Moldavie" },
-  { code: "(90)", flag: "🇹🇷", name: "Turquie" },
-  { code: "(972)", flag: "🇮🇱", name: "Israël" },
-  { code: "(971)", flag: "🇦🇪", name: "Émirats arabes unis" },
-  { code: "(966)", flag: "🇸🇦", name: "Arabie saoudite" },
-  { code: "(974)", flag: "🇶🇦", name: "Qatar" },
-  { code: "(965)", flag: "🇰🇼", name: "Koweït" },
-  { code: "(973)", flag: "🇧🇭", name: "Bahreïn" },
-  { code: "(968)", flag: "🇴🇲", name: "Oman" },
-  { code: "(961)", flag: "🇱🇧", name: "Liban" },
-  { code: "(962)", flag: "🇯🇴", name: "Jordanie" },
-  { code: "(963)", flag: "🇸🇾", name: "Syrie" },
-  { code: "(964)", flag: "🇮🇶", name: "Irak" },
-  { code: "(98)", flag: "🇮🇷", name: "Iran" },
-  { code: "(93)", flag: "🇦🇫", name: "Afghanistan" },
-  { code: "(92)", flag: "🇵🇰", name: "Pakistan" },
-  { code: "(91)", flag: "🇮🇳", name: "Inde" },
-  { code: "(94)", flag: "🇱🇰", name: "Sri Lanka" },
-  { code: "(880)", flag: "🇧🇩", name: "Bangladesh" },
-  { code: "(977)", flag: "🇳🇵", name: "Népal" },
-  { code: "(975)", flag: "🇧🇹", name: "Bhoutan" },
-  { code: "(960)", flag: "🇲🇻", name: "Maldives" },
-  { code: "(86)", flag: "🇨🇳", name: "Chine" },
-  { code: "(81)", flag: "🇯🇵", name: "Japon" },
-  { code: "(82)", flag: "🇰🇷", name: "Corée du Sud" },
-  { code: "(850)", flag: "🇰🇵", name: "Corée du Nord" },
-  { code: "(976)", flag: "🇲🇳", name: "Mongolie" },
-  { code: "(852)", flag: "🇭🇰", name: "Hong Kong" },
-  { code: "(853)", flag: "🇲🇴", name: "Macao" },
-  { code: "(886)", flag: "🇹🇼", name: "Taïwan" },
-  { code: "(65)", flag: "🇸🇬", name: "Singapour" },
-  { code: "(60)", flag: "🇲🇾", name: "Malaisie" },
-  { code: "(66)", flag: "🇹🇭", name: "Thaïlande" },
-  { code: "(84)", flag: "🇻🇳", name: "Vietnam" },
-  { code: "(855)", flag: "🇰🇭", name: "Cambodge" },
-  { code: "(856)", flag: "🇱🇦", name: "Laos" },
-  { code: "(95)", flag: "🇲🇲", name: "Myanmar" },
-  { code: "(62)", flag: "🇮🇩", name: "Indonésie" },
-  { code: "(63)", flag: "🇵🇭", name: "Philippines" },
-  { code: "(673)", flag: "🇧🇳", name: "Brunei" },
-  { code: "(670)", flag: "🇹🇱", name: "Timor oriental" },
-  { code: "(61)", flag: "🇦🇺", name: "Australie" },
-  { code: "(64)", flag: "🇳🇿", name: "Nouvelle-Zélande" },
-  { code: "(679)", flag: "🇫🇯", name: "Fidji" },
-  { code: "(685)", flag: "🇼🇸", name: "Samoa" },
-  { code: "(676)", flag: "🇹🇴", name: "Tonga" },
-  { code: "(678)", flag: "🇻🇺", name: "Vanuatu" },
-  { code: "(687)", flag: "🇳🇨", name: "Nouvelle-Calédonie" },
-  { code: "(689)", flag: "🇵🇫", name: "Polynésie française" },
-  { code: "(20)", flag: "🇪🇬", name: "Égypte" },
-  { code: "(27)", flag: "🇿🇦", name: "Afrique du Sud" },
-  { code: "(234)", flag: "🇳🇬", name: "Nigeria" },
-  { code: "(233)", flag: "🇬🇭", name: "Ghana" },
-  { code: "(225)", flag: "🇨🇮", name: "Côte d'Ivoire" },
-  { code: "(221)", flag: "🇸🇳", name: "Sénégal" },
-  { code: "(223)", flag: "🇲🇱", name: "Mali" },
-  { code: "(226)", flag: "🇧🇫", name: "Burkina Faso" },
-  { code: "(227)", flag: "🇳🇪", name: "Niger" },
-  { code: "(228)", flag: "🇹🇬", name: "Togo" },
-  { code: "(229)", flag: "🇧🇯", name: "Bénin" },
-  { code: "(237)", flag: "🇨🇲", name: "Cameroun" },
-  { code: "(240)", flag: "🇬🇶", name: "Guinée équatoriale" },
-  { code: "(241)", flag: "🇬🇦", name: "Gabon" },
-  { code: "(242)", flag: "🇨🇬", name: "République du Congo" },
-  { code: "(243)", flag: "🇨🇩", name: "République démocratique du Congo" },
-  { code: "(236)", flag: "🇨🇫", name: "République centrafricaine" },
-  { code: "(235)", flag: "🇹🇩", name: "Tchad" },
-  { code: "(249)", flag: "🇸🇩", name: "Soudan" },
-  { code: "(211)", flag: "🇸🇸", name: "Soudan du Sud" },
-  { code: "(251)", flag: "🇪🇹", name: "Éthiopie" },
-  { code: "(252)", flag: "🇸🇴", name: "Somalie" },
-  { code: "(253)", flag: "🇩🇯", name: "Djibouti" },
-  { code: "(254)", flag: "🇰🇪", name: "Kenya" },
-  { code: "(255)", flag: "🇹🇿", name: "Tanzanie" },
-  { code: "(256)", flag: "🇺🇬", name: "Ouganda" },
-  { code: "(250)", flag: "🇷🇼", name: "Rwanda" },
-  { code: "(257)", flag: "🇧🇮", name: "Burundi" },
-  { code: "(258)", flag: "🇲🇿", name: "Mozambique" },
-  { code: "(260)", flag: "🇿🇲", name: "Zambie" },
-  { code: "(263)", flag: "🇿🇼", name: "Zimbabwe" },
-  { code: "(267)", flag: "🇧🇼", name: "Botswana" },
-  { code: "(268)", flag: "🇸🇿", name: "Eswatini" },
-  { code: "(266)", flag: "🇱🇸", name: "Lesotho" },
-  { code: "(264)", flag: "🇳🇦", name: "Namibie" },
-  { code: "(261)", flag: "🇲🇬", name: "Madagascar" },
-  { code: "(230)", flag: "🇲🇺", name: "Maurice" },
-  { code: "(248)", flag: "🇸🇨", name: "Seychelles" },
-  { code: "(269)", flag: "🇰🇲", name: "Comores" },
-  { code: "(262)", flag: "🇷🇪", name: "La Réunion" },
-  { code: "(590)", flag: "🇬🇵", name: "Guadeloupe" },
-  { code: "(596)", flag: "🇲🇶", name: "Martinique" },
-  { code: "(594)", flag: "🇬🇫", name: "Guyane française" },
-  { code: "(508)", flag: "🇵🇲", name: "Saint-Pierre-et-Miquelon" },
-  { code: "(212)", flag: "🇲🇦", name: "Maroc" },
-  { code: "(213)", flag: "🇩🇿", name: "Algérie" },
-  { code: "(216)", flag: "🇹🇳", name: "Tunisie" },
-  { code: "(218)", flag: "🇱🇾", name: "Libye" },
-  { code: "(52)", flag: "🇲🇽", name: "Mexique" },
-  { code: "(54)", flag: "🇦🇷", name: "Argentine" },
-  { code: "(55)", flag: "🇧🇷", name: "Brésil" },
-  { code: "(56)", flag: "🇨🇱", name: "Chili" },
-  { code: "(57)", flag: "🇨🇴", name: "Colombie" },
-  { code: "(58)", flag: "🇻🇪", name: "Venezuela" },
-  { code: "(51)", flag: "🇵🇪", name: "Pérou" },
-  { code: "(593)", flag: "🇪🇨", name: "Équateur" },
-  { code: "(591)", flag: "🇧🇴", name: "Bolivie" },
-  { code: "(595)", flag: "🇵🇾", name: "Paraguay" },
-  { code: "(598)", flag: "🇺🇾", name: "Uruguay" },
-  { code: "(597)", flag: "🇸🇷", name: "Suriname" },
-  { code: "(592)", flag: "🇬🇾", name: "Guyana" },
-]
 
 const PACKS = [
   { id: "free", name: "Pack Free", description: "50 chants harmonisés (Gratuit)", priceEUR: 0, priceFCFA: 0 },
@@ -296,7 +151,6 @@ export function MultiStepOrderForm() {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
-    countryCode: "(33)", // Updated default country code to use parentheses format
     email: "",
     currency: "EUR",
     selectedPack: "",
@@ -427,26 +281,11 @@ export function MultiStepOrderForm() {
                   Numéro de téléphone (WhatsApp de préférence) *
                 </Label>
                 <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                  <Select
-                    value={formData.countryCode}
-                    onValueChange={(value) => setFormData((prev) => ({ ...prev, countryCode: value }))}
-                  >
-                    <SelectTrigger className="w-full sm:w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      {COUNTRIES.map((country, index) => (
-                        <SelectItem key={`${country.code}-${index}`} value={country.code}>
-                          {country.flag} {country.code}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   <Input
                     id="phone"
                     type="tel"
                     required
-                    placeholder="123456789"
+                    placeholder="ex: +212699999999"
                     value={formData.phone}
                     onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
                     className="flex-1 text-responsive"
@@ -663,7 +502,7 @@ export function MultiStepOrderForm() {
                     <strong>Nom:</strong> {formData.name}
                   </p>
                   <p>
-                    <strong>Téléphone:</strong> {formData.countryCode} {formData.phone}
+                    <strong>Téléphone:</strong>{formData.phone}
                   </p>
                   <p>
                     <strong>Email:</strong> {formData.email}
