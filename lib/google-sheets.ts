@@ -51,6 +51,8 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
         "Email",
         "Devise",
         "Pack Choisi",
+        "Fréquence Paiement",
+        "Moyen Paiement",
         "Pack Asaph",
         "Pack Ethan 1",
         "Pack Ethan 2",
@@ -59,8 +61,6 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
         "Pack Heman 2",
         "Pack Heman 3",
         "Pack Heman 4",
-        "Fréquence Paiement",
-        "Moyen Paiement",
         "Total Pack Principal",
         "Total Accompagnement",
         "Commentaires",
@@ -150,21 +150,6 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
       }
     }
 
-    const getPaymentFrequencyLabel = (frequency: string) => {
-      switch (frequency) {
-        case "monthly":
-          return "/mois"
-        case "quarterly":
-          return "/trimestre"
-        case "biannual":
-          return "/semestre"
-        case "annual":
-          return "/an"
-        default:
-          return "/mois"
-      }
-    }
-
     const getPaymentMethodLabel = (method: string) => {
       switch (method) {
         case "bank":
@@ -198,10 +183,10 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
       data.email,
       data.currency,
       data.selectedPack,
-      ...accompanimentColumns,
       getFrequencyLabel(data.paymentFrequency),
       getPaymentMethodLabel(data.paymentMethod),
-      totals.mainPackTotal > 0 ? `${totals.mainPackTotal} ${data.currency} ${getPaymentFrequencyLabel(data.paymentFrequency)}` : "0",
+      ...accompanimentColumns,
+      totals.mainPackTotal > 0 ? `${totals.mainPackTotal} ${data.currency}` : "0",
       totals.accompanimentTotal > 0 ? `${totals.accompanimentTotal} ${data.currency}` : "0",
       data.comments || "Aucun commentaire",
     ]
