@@ -202,7 +202,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Confirmation de commande - Plenistore</title>
+        <title>Confirmation de commande - PleniHarmony</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background: linear-gradient(135deg, #8B5A3C, #A0522D); color: white; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
@@ -217,7 +217,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
       <body>
         <div class="header">
           <h1>🎵 Confirmation de commande</h1>
-          <p>Merci pour votre commande chez Plenistore !</p>
+          <p>Merci pour votre commande chez PleniHarmony!</p>
         </div>
 
         <div class="section">
