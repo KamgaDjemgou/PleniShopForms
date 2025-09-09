@@ -150,7 +150,7 @@ const getPaymentMethodLabel = (method: string) => {
 
 export async function sendOrderConfirmationEmail(orderData: OrderData) {
   try {
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number.parseInt(process.env.SMTP_PORT || "587"),
       secure: process.env.SMTP_SECURE === "true",
@@ -224,7 +224,6 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
           <h3>👤 Informations personnelles</h3>
           <p><strong>Nom:</strong> ${orderData.name}</p>
           <p><strong>Téléphone:</strong> ${orderData.phone}</p>
-          <p><strong>Email:</strong> ${orderData.email}</p>
           <p><strong>Devise:</strong> ${orderData.currency}</p>
         </div>
 
@@ -326,12 +325,12 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
       </body>
       </html>
     `
-
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: orderData.email,
+      cc: process.env.PLENISOFTS_EMAIL,
       subject: `Confirmation de commande - Plenistore - ${orderData.name}`,
-      html: htmlContent,
+      html: htmlContent
     }
 
     await transporter.sendMail(mailOptions)
