@@ -75,9 +75,14 @@ export default function SuccessPage() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <Button asChild className="flex-1" size="lg">
-              <Link href="/" className="flex items-center justify-center gap-2">
+              <Link href="/order" className="flex items-center justify-center gap-2">
                 <RotateCcw className="h-4 w-4" />
                 Nouvelle Commande
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="flex-1 bg-transparent" size="lg">
+              <Link href="/" className="flex items-center justify-center gap-2">
+                Retour à l'accueil
               </Link>
             </Button>
           </div>
