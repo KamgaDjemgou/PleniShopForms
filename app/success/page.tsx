@@ -58,7 +58,7 @@ export default function SuccessPage() {
             <h3 className="text-lg font-semibold text-green-800 mb-3">Que se passe-t-il maintenant ?</h3>
             <div className="text-sm text-green-700 space-y-2 text-left">
               <p>✅ Votre commande a été enregistrée dans notre système</p>
-              <p>✅ Notre équipe PLENISOFTS vous contactera pour finaliser votre abonnement</p>
+              <p>✅ Notre équipe PLENIHARMONY vous contactera pour finaliser votre abonnement</p>
               <p>✅ Vous aurez accès à vos packs selon les modalités choisies</p>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function SuccessPage() {
           <div className="pt-4 border-t">
             <p className="text-lg font-medium text-primary mb-2">Merci de votre confiance ! 🎵</p>
             <p className="text-sm text-muted-foreground">
-              L'équipe PLENISOFTS est ravie de vous accompagner dans votre parcours musical.
+              L'équipe PLENIHARMONY est ravie de vous accompagner dans votre parcours musical.
             </p>
           </div>
         </CardContent>

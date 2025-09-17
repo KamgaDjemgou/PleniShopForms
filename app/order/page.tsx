@@ -37,16 +37,16 @@ export default function OrderPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 text-primary/70 mb-6 max-w-lg sm:max-w-none mx-auto">
               <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors">
-                <span className="text-xl sm:text-2xl">🎵</span>
-                <span className="text-xs sm:text-sm font-medium text-accent">Harmonisation</span>
+                <span className="text-xl sm:text-2xl">🎤</span>
+                <span className="text-xs sm:text-sm font-medium text-accent">Harmonisations</span>
               </div>
               <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors">
                 <span className="text-xl sm:text-2xl">🎹</span>
-                <span className="text-xs sm:text-sm font-medium text-primary">Instruments</span>
+                <span className="text-xs sm:text-sm font-medium text-primary">Instrumentations</span>
               </div>
               <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-secondary/10 border border-secondary/20 hover:bg-secondary/20 transition-colors">
-                <span className="text-xl sm:text-2xl">🎤</span>
-                <span className="text-xs sm:text-sm font-medium text-secondary">Voix</span>
+                <span className="text-xl sm:text-2xl">🎵</span>
+                <span className="text-xs sm:text-sm font-medium text-secondary">Accompagnements</span>
               </div>
             </div>
 

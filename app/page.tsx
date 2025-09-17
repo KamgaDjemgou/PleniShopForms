@@ -29,22 +29,22 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-12">
               <Card className="bg-accent/10 border-accent/20 hover:bg-accent/20 transition-all duration-300 hover:scale-105">
                 <CardContent className="p-6 text-center">
-                  <span className="text-4xl mb-4 block">🎵</span>
-                  <h3 className="font-semibold text-accent mb-2">Harmonisation</h3>
+                  <span className="text-4xl mb-4 block">🎤</span>
+                  <h3 className="font-semibold text-accent mb-2">Harmonisations</h3>
                   <p className="text-sm text-muted-foreground">Apprenez les techniques d'harmonisation</p>
                 </CardContent>
               </Card>
               <Card className="bg-primary/10 border-primary/20 hover:bg-primary/20 transition-all duration-300 hover:scale-105">
                 <CardContent className="p-6 text-center">
                   <span className="text-4xl mb-4 block">🎹</span>
-                  <h3 className="font-semibold text-primary mb-2">Instruments</h3>
+                  <h3 className="font-semibold text-primary mb-2">Instrumentations</h3>
                   <p className="text-sm text-muted-foreground">Maîtrisez l'accompagnement instrumental</p>
                 </CardContent>
               </Card>
               <Card className="bg-secondary/10 border-secondary/20 hover:bg-secondary/20 transition-all duration-300 hover:scale-105">
                 <CardContent className="p-6 text-center">
-                  <span className="text-4xl mb-4 block">🎤</span>
-                  <h3 className="font-semibold text-secondary mb-2">Voix</h3>
+                  <span className="text-4xl mb-4 block">🎵</span>
+                  <h3 className="font-semibold text-secondary mb-2">Accompagnements</h3>
                   <p className="text-sm text-muted-foreground">Développez votre technique vocale</p>
                 </CardContent>
               </Card>

@@ -308,10 +308,10 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
           <h3>⚠️ NOTE IMPORTANTE</h3>
           <p>Vous avez la possibilité une fois abonné(e) de :</p>
           <ul>
-            <li>soit demander une harmonisation (voix) ou une instrumentation (instrument piano ou guitare ou bass ou batterie) d'un chant donné à PLENISOFTS ${
+            <li>soit demander une harmonisation (voix) ou une instrumentation (instrument piano ou guitare ou bass ou batterie) d'un chant donné à l'équipe PLENIHARMONY (${
               orderData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"
             } si votre proposition est retenue).</li>
-            <li>soit proposer à PLENISOFTS votre propre harmonisation ou instrumentation pour enrichir la base de chants (dans ce cas, PLENISOFTS vous paiera ${
+            <li>soit proposer à PLENIHARMONY votre propre harmonisation ou instrumentation pour enrichir la base de chants (dans ce cas, PLENIHARMONY vous paiera ${
               orderData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"
             } si votre proposition est retenue).</li>
           </ul>
@@ -319,7 +319,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
 
         <div class="footer">
           <p>Merci de votre confiance !</p>
-          <p><strong>Équipe Plenistore</strong></p>
+          <p><strong>Équipe PleniHarmony</strong></p>
           <p>Pour toute question, n'hésitez pas à nous contacter.</p>
         </div>
       </body>
@@ -329,7 +329,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
       from: process.env.SMTP_USER,
       to: orderData.email,
       cc: process.env.PLENISOFTS_EMAIL,
-      subject: `Confirmation de commande - Plenistore - ${orderData.name}`,
+      subject: `Confirmation de commande - PleniHarmony - ${orderData.name}`,
       html: htmlContent
     }
 
