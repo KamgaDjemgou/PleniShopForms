@@ -61,8 +61,8 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="transition-transform hover:scale-105"
               >
-                <div className="flex items-center gap-3 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors">
-                  <Image src="/images/appstore-icon.png" alt="App Store" width={24} height={24} className="w-6 h-6" />
+                <div className="flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg">
+                  <Image src="/images/appstore-icon.png" alt="App Store" width={32} height={32} className="w-8 h-8" />
                   <div className="text-left">
                     <div className="text-xs">Télécharger sur</div>
                     <div className="text-lg font-semibold">App Store</div>
@@ -75,13 +75,13 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="transition-transform hover:scale-105"
               >
-                <div className="flex items-center gap-3 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+                <div className="flex items-center gap-3 bg-gradient-to-r from-green-700 to-green-800 text-white px-6 py-3 rounded-lg hover:from-green-800 hover:to-green-900 transition-all duration-300 shadow-lg">
                   <Image
                     src="/images/playstore-icon.png"
                     alt="Google Play"
-                    width={24}
-                    height={24}
-                    className="w-6 h-6"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8"
                   />
                   <div className="text-left">
                     <div className="text-xs">Disponible sur</div>
