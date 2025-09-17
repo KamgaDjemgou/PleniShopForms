@@ -62,7 +62,7 @@ export default function Home() {
                 className="transition-transform hover:scale-105"
               >
                 <div className="flex items-center gap-3 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors">
-                  <span className="text-2xl">📱</span>
+                  <Image src="/images/appstore-icon.png" alt="App Store" width={24} height={24} className="w-6 h-6" />
                   <div className="text-left">
                     <div className="text-xs">Télécharger sur</div>
                     <div className="text-lg font-semibold">App Store</div>
@@ -76,7 +76,13 @@ export default function Home() {
                 className="transition-transform hover:scale-105"
               >
                 <div className="flex items-center gap-3 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
-                  <span className="text-2xl">🤖</span>
+                  <Image
+                    src="/images/playstore-icon.png"
+                    alt="Google Play"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6"
+                  />
                   <div className="text-left">
                     <div className="text-xs">Disponible sur</div>
                     <div className="text-lg font-semibold">Google Play</div>
