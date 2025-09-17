@@ -217,7 +217,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
       <body>
         <div class="header">
           <h1>🎵 Confirmation de commande</h1>
-          <p>Merci pour votre commande chez PleniHarmony!</p>
+          <p>Merci pour votre commande PleniHarmony!</p>
         </div>
 
         <div class="section">
