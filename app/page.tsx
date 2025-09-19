@@ -31,21 +31,21 @@ export default function Home() {
                 <CardContent className="p-6 text-center">
                   <span className="text-4xl mb-4 block">🎤</span>
                   <h3 className="font-semibold text-accent mb-2">Harmonisations</h3>
-                  <p className="text-sm text-muted-foreground">Apprenez les techniques d'harmonisation</p>
+                  <p className="text-sm text-muted-foreground">Apprenez aisément les harmonies vocales de divers cantiques</p>
                 </CardContent>
               </Card>
               <Card className="bg-primary/10 border-primary/20 hover:bg-primary/20 transition-all duration-300 hover:scale-105">
                 <CardContent className="p-6 text-center">
                   <span className="text-4xl mb-4 block">🎹</span>
                   <h3 className="font-semibold text-primary mb-2">Instrumentations</h3>
-                  <p className="text-sm text-muted-foreground">Maîtrisez l'accompagnement instrumental</p>
+                  <p className="text-sm text-muted-foreground">Maîtrisez les jeux d'instruments sur diverses orchestrations</p>
                 </CardContent>
               </Card>
               <Card className="bg-secondary/10 border-secondary/20 hover:bg-secondary/20 transition-all duration-300 hover:scale-105">
                 <CardContent className="p-6 text-center">
                   <span className="text-4xl mb-4 block">🎵</span>
                   <h3 className="font-semibold text-secondary mb-2">Accompagnements</h3>
-                  <p className="text-sm text-muted-foreground">Développez votre technique vocale</p>
+                  <p className="text-sm text-muted-foreground">Recevez quelques conseils dans votre production/diffusion musicale</p>
                 </CardContent>
               </Card>
             </div>
@@ -53,7 +53,7 @@ export default function Home() {
 
           {/* App Store Links */}
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">Téléchargez l'application</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">Téléchargez la version gratuite de l'application</h2>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
               <Link
                 href="https://apps.apple.com/fr/app/pleniharmony/id6749804829?l=en-GB"
@@ -64,7 +64,7 @@ export default function Home() {
                 <div className="flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg">
                   <Image src="/images/appstore-icon.png" alt="App Store" width={32} height={32} className="w-8 h-8" />
                   <div className="text-left">
-                    <div className="text-xs">Télécharger sur</div>
+                    <div className="text-xs">Disponible sur</div>
                     <div className="text-lg font-semibold">App Store</div>
                   </div>
                 </div>

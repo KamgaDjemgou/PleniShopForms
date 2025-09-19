@@ -836,8 +836,7 @@ export function MultiStepOrderForm() {
                   <br />
                   Vous avez la possibilité une fois abonné(e) de :
                   <br />• soit demander une harmonisation (voix) ou une instrumentation (instrument piano ou guitare ou
-                  bass ou batterie) d'un chant donné à PLENIHARMONY ({" "}
-                  {formData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"} si votre proposition est retenue).
+                  bass ou batterie) d'un chant donné à PLENIHARMONY ({formData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"} si votre proposition est retenue).
                   <br />• soit proposer à PLENIHARMONY votre propre harmonisation ou instrumentation pour enrichir la base
                   de chants (dans ce cas, PLENIHARMONY vous paiera{" "}
                   {formData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"} si votre proposition est retenue).
