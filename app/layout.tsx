@@ -10,13 +10,13 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Commande PleniHarmony",
-  description: "Formulaire de commande pour les services de chant et d'accompagnement musical - PleniHarmony",
-  generator: "PleniHarmony",
+  title: "Inscription Chadah Academy",
+  description: "Formulaire d'inscription à Chadah Academy - Formation en ligne de musique et production musicale",
+  generator: "Chadah Academy Forms",
   icons: {
-    icon: "/images/plenisofts-logo.png",
-    shortcut: "/images/plenisofts-logo.png",
-    apple: "/images/plenisofts-logo.png",
+    icon: "/images/chadah-logo.jpg",
+    shortcut: "/images/chadah-logo.jpg",
+    apple: "/images/chadah-logo.jpg",
   },
 }
 

@@ -30,56 +30,43 @@ interface FormData {
   phone: string
   email: string
   currency: "EUR" | "FCFA"
-  selectedPack: string
+  selectedModule: string
   accompanimentPacks: { [key: string]: number }
   comments: string
   paymentFrequency: "monthly" | "quarterly" | "biannual" | "annual"
   paymentMethod: "bank" | "mobile" | "paypal"
 }
 
-const PACKS = [
-  { id: "free", name: "Pack Free", description: "50 chants harmonisés (Gratuit)", priceEUR: 0, priceFCFA: 0 },
+const MODULES_CHADAH = [
   {
-    id: "david",
-    name: "Pack David",
-    description: "100 chants harmonisés/orchestrés, réservé à une seule personne",
-    priceEUR: 20,
-    priceFCFA: 10000,
-    monthly: true,
+    id: "chant",
+    name: "Chant",
+    description: "Apprenez à chanter et à harmoniser les cantiques",
+    icon: "🎤",
   },
   {
-    id: "ekklesia1",
-    name: "Pack Ekklesia 1",
-    description: "Tous les chants harmonisés/orchestrés, groupe de 1 à 10 personnes",
-    priceEUR: 100,
-    priceFCFA: 50000,
-    monthly: true,
+    id: "piano",
+    name: "Piano",
+    description: "Apprenez à jouer au piano et à accompagner les cantiques",
+    icon: "🎹",
   },
   {
-    id: "ekklesia2",
-    name: "Pack Ekklesia 2",
-    description: "Tous les chants harmonisés/orchestrés, groupe de 11 à 50 personnes",
-    priceEUR: 200,
-    priceFCFA: 100000,
-    monthly: true,
+    id: "guitare",
+    name: "Guitare",
+    description: "Apprenez à jouer à la guitare et à accompagner les cantiques",
+    icon: "🎸",
   },
   {
-    id: "ekklesia3",
-    name: "Pack Ekklesia 3",
-    description: "Tous les chants harmonisés/orchestrés, groupe de 51 à 100 personnes",
-    priceEUR: 300,
-    priceFCFA: 150000,
-    monthly: true,
-  },
-  {
-    id: "ekklesia4",
-    name: "Pack Ekklesia 4",
-    description: "Tous les chants harmonisés/orchestrés, groupe de plus de 100 personnes",
-    priceEUR: 300,
-    priceFCFA: 200000,
-    monthly: true,
+    id: "percussion",
+    name: "Percussion",
+    description: "Apprenez à jouer aux percussions et à accompagner les cantiques",
+    icon: "🥁",
   },
 ]
+
+// Prix unique pour tous les modules: 20 EUR ou 10.000 FCFA / mois
+const MODULE_PRICE_EUR = 20
+const MODULE_PRICE_FCFA = 10000
 
 const ACCOMPANIMENT_PACKS = [
   {
@@ -150,8 +137,8 @@ const ACCOMPANIMENT_PACKS = [
 
 const STEPS = [
   { id: 1, title: "Informations", icon: User },
-  { id: 2, title: "Pack principal", icon: Music },
-  { id: 3, title: "Pack(s) d'accompagnement", icon: Piano },
+  { id: 2, title: "Module Chadah", icon: Music },
+  { id: 3, title: "Accompagnements", icon: Piano },
   { id: 4, title: "Paiement", icon: Wallet },
   { id: 5, title: "Commentaires", icon: Mic },
   { id: 6, title: "Récapitulatif", icon: CreditCard },
@@ -167,7 +154,7 @@ export function MultiStepOrderForm() {
     phone: "",
     email: "",
     currency: "EUR",
-    selectedPack: "",
+    selectedModule: "",
     accompanimentPacks: {},
     comments: "",
     paymentFrequency: "monthly",
@@ -175,16 +162,14 @@ export function MultiStepOrderForm() {
   })
 
   const calculateTotal = () => {
-    let mainPackTotal = 0
+    let modulesTotal = 0
     let accompanimentTotal = 0
 
-    if (formData.selectedPack) {
-      const pack = PACKS.find((p) => p.id === formData.selectedPack)
-      if (pack && pack.priceEUR > 0) {
-        const basePrice = formData.currency === "EUR" ? pack.priceEUR : pack.priceFCFA
-        const frequencyMultiplier = getFrequencyMultiplier(formData.paymentFrequency)
-        mainPackTotal = basePrice * frequencyMultiplier
-      }
+    // Prix unique pour le module sélectionné (20 EUR ou 10.000 FCFA / mois)
+    if (formData.selectedModule) {
+      const basePrice = formData.currency === "EUR" ? MODULE_PRICE_EUR : MODULE_PRICE_FCFA
+      const frequencyMultiplier = getFrequencyMultiplier(formData.paymentFrequency)
+      modulesTotal = basePrice * frequencyMultiplier
     }
 
     Object.entries(formData.accompanimentPacks).forEach(([packId, quantity]) => {
@@ -195,7 +180,7 @@ export function MultiStepOrderForm() {
       }
     })
 
-    return { mainPackTotal, accompanimentTotal, total: mainPackTotal + accompanimentTotal }
+    return { modulesTotal, accompanimentTotal, total: modulesTotal + accompanimentTotal }
   }
 
   const getFrequencyMultiplier = (frequency: string) => {
@@ -243,7 +228,7 @@ export function MultiStepOrderForm() {
       case 1:
         return formData.name && formData.phone && formData.email
       case 2:
-        return formData.selectedPack
+        return formData.selectedModule !== ""
       case 3:
       case 4:
       case 5:
@@ -274,7 +259,7 @@ export function MultiStepOrderForm() {
       const submissionData = {
         ...formData,
         totalPrice: totals.total,
-        mainPackTotal: totals.mainPackTotal,
+        modulesTotal: totals.modulesTotal,
         accompanimentTotal: totals.accompanimentTotal,
         paymentFrequency: formData.paymentFrequency,
         paymentMethod: formData.paymentMethod,
@@ -300,12 +285,14 @@ export function MultiStepOrderForm() {
           // Continue with success flow even if email fails
         }
 
+        const selectedModuleName = MODULES_CHADAH.find(m => m.id === formData.selectedModule)?.name || ""
         const params = new URLSearchParams({
           total: totals.total.toString(),
           currency: formData.currency,
-          mainPackTotal: totals.mainPackTotal.toString(),
+          modulesTotal: totals.modulesTotal.toString(),
           accompanimentTotal: totals.accompanimentTotal.toString(),
           frequency: getFrequencyLabel(formData.paymentFrequency),
+          module: selectedModuleName,
         })
         router.push(`/success?${params.toString()}`)
         console.log("[v0] Form submitted successfully, redirecting to success page")
@@ -413,38 +400,59 @@ export function MultiStepOrderForm() {
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 heading-responsive">
                 <Music className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                Sélection du Pack Principal
+                Sélection du Module Chadah
               </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="mb-4 p-3 sm:p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <p className="text-sm sm:text-base font-semibold text-primary">
+                  {formData.currency === "EUR" ? "20 EUR" : "10.000 FCFA"} / mois pour le module choisi
+                </p>
+              </div>
+              
+              <Alert className="mb-6 border-accent/30 bg-accent/5">
+                <AlertCircle className="h-4 w-4 text-accent" />
+                <AlertDescription className="text-xs sm:text-sm">
+                  <strong>Nota:</strong> En fonction du module choisi, vous serez soumis(e) à un test d'évaluation afin de vous inscrire dans la classe correspondant à votre niveau d'apprentissage.
+                </AlertDescription>
+              </Alert>
+
               <RadioGroup
-                value={formData.selectedPack}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, selectedPack: value }))}
+                value={formData.selectedModule}
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, selectedModule: value }))}
                 className="space-y-3"
               >
-                {PACKS.map((pack) => (
+                {MODULES_CHADAH.map((module) => (
                   <div
-                    key={pack.id}
-                    className="flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors border-l-4 border-l-accent/50"
+                    key={module.id}
+                    className={`flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer ${
+                      formData.selectedModule === module.id
+                        ? "border-primary bg-primary/10 border-l-4 border-l-primary"
+                        : "border-l-4 border-l-accent/50"
+                    }`}
                   >
-                    <RadioGroupItem value={pack.id} id={pack.id} className="mt-1" />
+                    <RadioGroupItem value={module.id} id={module.id} className="mt-1" />
                     <div className="flex-1 min-w-0">
                       <Label
-                        htmlFor={pack.id}
+                        htmlFor={module.id}
                         className="font-medium cursor-pointer flex items-center gap-2 text-responsive"
                       >
-                        🎵 {pack.name}
+                        <span className="text-xl sm:text-2xl">{module.icon}</span>
+                        {module.name}
                       </Label>
-                      <p className="text-xs sm:text-sm text-muted-foreground mt-1 text-pretty">{pack.description}</p>
-                      <p className="text-xs sm:text-sm font-semibold text-primary mt-1">
-                        {pack.priceEUR === 0
-                          ? "✨ Gratuit"
-                          : `${formData.currency === "EUR" ? pack.priceEUR + " EUR" : pack.priceFCFA.toLocaleString() + " FCFA"}${pack.monthly ? " / mois" : ""}`}
-                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1 text-pretty">{module.description}</p>
                     </div>
                   </div>
                 ))}
               </RadioGroup>
+
+              {formData.selectedModule && (
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-primary/20">
+                  <p className="text-sm font-medium">
+                    Module sélectionné : {MODULES_CHADAH.find(m => m.id === formData.selectedModule)?.name}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )
@@ -538,10 +546,10 @@ export function MultiStepOrderForm() {
               </CardTitle>
             </CardHeader>
             <CardContent className="spacing-responsive">
-              {formData.selectedPack && PACKS.find((p) => p.id === formData.selectedPack)?.priceEUR > 0 && (
+              {formData.selectedModule && (
                 <div>
                   <Label className="text-responsive font-semibold">
-                    Fréquence de paiement (Pack principal uniquement)
+                    Fréquence de paiement (Module Chadah)
                   </Label>
                   <RadioGroup
                     value={formData.paymentFrequency}
@@ -634,31 +642,7 @@ export function MultiStepOrderForm() {
                           <strong>🇸🇳 Sénégal (Orange / Wave):</strong> +221775091447
                         </p>
                         <p>
-                          <strong>🇬🇦 Gabon (Airtel):</strong> +24160271771
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <RadioGroupItem value="paypal" id="paypal" />
-                      <Label htmlFor="paypal" className="text-responsive cursor-pointer font-medium">
-                        💳 Par PayPal
-                      </Label>
-                    </div>
-                    {formData.paymentMethod === "paypal" && (
-                      <div className="ml-6 text-xs sm:text-sm bg-muted/30 p-3 rounded">
-                        <p>
-                          <strong>Lien:</strong>{" "}
-                          <a
-                            href="https://paypal.me/chadahmusic"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            paypal.me/chadahmusic
-                          </a>
+                          <strong>🇬🇦 Gabon (Airtel):</strong>+24177309444
                         </p>
                       </div>
                     )}
@@ -728,34 +712,28 @@ export function MultiStepOrderForm() {
                 </div>
               </div>
 
-              {formData.selectedPack && (
+              {formData.selectedModule && (
                 <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-primary/20">
                   <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
                     <Music className="h-4 w-4 text-primary" />
-                    Pack principal sélectionné
+                    Module Chadah sélectionné
                   </h3>
-                  {(() => {
-                    const pack = PACKS.find((p) => p.id === formData.selectedPack)
-                    return pack ? (
-                      <div className="text-xs sm:text-sm space-y-2">
-                        <p>
-                          <strong>{pack.name}</strong>
-                        </p>
-                        <p className="text-muted-foreground text-pretty">{pack.description}</p>
-                        {pack.priceEUR > 0 && (
-                          <>
-                            <p>
-                              <strong>Fréquence:</strong> {getFrequencyLabel(formData.paymentFrequency)}
-                            </p>
-                            <p className="text-primary font-semibold">
-                              Total: {totals.mainPackTotal.toLocaleString()} {formData.currency}
-                            </p>
-                          </>
-                        )}
-                        {pack.priceEUR === 0 && <p className="text-primary font-semibold">Gratuit</p>}
-                      </div>
-                    ) : null
-                  })()}
+                  <div className="text-xs sm:text-sm space-y-2">
+                    {(() => {
+                      const module = MODULES_CHADAH.find((m) => m.id === formData.selectedModule)
+                      return module ? (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/20 rounded-full text-primary">
+                          {module.icon} {module.name}
+                        </span>
+                      ) : null
+                    })()}
+                    <p>
+                      <strong>Fréquence:</strong> {getFrequencyLabel(formData.paymentFrequency)}
+                    </p>
+                    <p className="text-primary font-semibold">
+                      Total: {totals.modulesTotal.toLocaleString()} {formData.currency}
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -803,7 +781,7 @@ export function MultiStepOrderForm() {
                   Informations de paiement
                 </h3>
                 <div className="text-xs sm:text-sm space-y-1">
-                  {formData.selectedPack && PACKS.find((p) => p.id === formData.selectedPack)?.priceEUR > 0 && (
+                  {formData.selectedModule && (
                     <p>
                       <strong>Fréquence:</strong> {getFrequencyLabel(formData.paymentFrequency)}
                     </p>
@@ -834,29 +812,32 @@ export function MultiStepOrderForm() {
                 <AlertDescription className="text-xs sm:text-sm">
                   <strong>NOTE IMPORTANTE</strong>
                   <br />
-                  Vous avez la possibilité une fois abonné(e) de :
-                  <br />• soit demander une harmonisation (voix) ou une instrumentation (instrument piano ou guitare ou
-                  bass ou batterie) d'un chant donné à PLENIHARMONY ({formData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"} si votre proposition est retenue).
-                  <br />• soit proposer à PLENIHARMONY votre propre harmonisation ou instrumentation pour enrichir la base
-                  de chants (dans ce cas, PLENIHARMONY vous paiera{" "}
-                  {formData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"} si votre proposition est retenue).
+                  • Rejoignez si ce n'est pas encore fait notre groupe WhatsApp d'information Chadah Academy :<a 
+                    href="https://chat.whatsapp.com/EOn3a8doHhg3PgV33tbzst" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline font-medium"
+                  >Rejoindre le groupe</a>
+                  • Vous serez rajouté(e) à un autre groupe WhatsApp de travail pour des séances ponctuelles communes avec le formateur, selon les disponibilités
+                  <br />
+                  • Votre inscription confirmée (par paiement) vous donnera accès à la plateforme e-learning de Chadah Academy avec les cours relatifs au module de formation choisi
                 </AlertDescription>
               </Alert>
 
               <div className="space-y-4 mt-4">
-                {totals.mainPackTotal > 0 && (
+                {totals.modulesTotal > 0 && (
                   <div className="border-2 border-primary rounded-lg p-4 sm:p-6 text-center musical-gradient text-white shadow-lg">
-                    <h3 className="text-base sm:text-lg font-semibold mb-2">Pack Principal</h3>
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">Module Chadah</h3>
                     <p className="text-sm opacity-90">{getFrequencyLabel(formData.paymentFrequency)}</p>
                     <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2">
-                      {totals.mainPackTotal.toLocaleString()} {formData.currency}
+                      {totals.modulesTotal.toLocaleString()} {formData.currency}
                     </p>
                   </div>
                 )}
 
                 {totals.accompanimentTotal > 0 && (
                   <div className="border-2 border-secondary rounded-lg p-4 sm:p-6 text-center bg-gradient-to-br from-secondary/20 to-secondary/10 shadow-lg">
-                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-secondary">Packs d'Accompagnement</h3>
+                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-secondary">Accompagnements</h3>
                     <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2 text-secondary">
                       {totals.accompanimentTotal.toLocaleString()} {formData.currency}
                     </p>
@@ -876,7 +857,7 @@ export function MultiStepOrderForm() {
                     Enregistrement en cours...
                   </>
                 ) : (
-                  "Confirmer la commande"
+                  "Confirmer mon inscription"
                 )}
               </Button>
             </CardContent>

@@ -20,8 +20,8 @@ export default function OrderPage() {
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex items-center justify-center gap-4 mb-4 sm:mb-6">
               <Image
-                src="/images/plenisofts-logo.png"
-                alt="PleniSofts Logo"
+                src="/images/chadah-logo.jpg"
+                alt="Chadah Academy Logo"
                 width={120}
                 height={80}
                 className="object-contain w-20 h-auto sm:w-24 md:w-32"
@@ -29,20 +29,20 @@ export default function OrderPage() {
               />
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2 text-balance">
-              Formulaire de Commande
+              Formulaire d'inscription Chadah Academy
             </h1>
             <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-4 text-pretty max-w-2xl mx-auto">
-              Personnalisez votre expérience PleniHarmony
+              Remplissez le formulaire ci-dessous pour vous inscrire à Chadah Academy, une école pour chantres exercés au chant de l'Éternel et habiles dans leur ministère.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 text-primary/70 mb-6 max-w-lg sm:max-w-none mx-auto">
               <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors">
                 <span className="text-xl sm:text-2xl">🎤</span>
-                <span className="text-xs sm:text-sm font-medium text-accent">Harmonisations</span>
+                <span className="text-xs sm:text-sm font-medium text-accent">Chants</span>
               </div>
               <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors">
                 <span className="text-xl sm:text-2xl">🎹</span>
-                <span className="text-xs sm:text-sm font-medium text-primary">Instrumentations</span>
+                <span className="text-xs sm:text-sm font-medium text-primary">Instruments</span>
               </div>
               <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-secondary/10 border border-secondary/20 hover:bg-secondary/20 transition-colors">
                 <span className="text-xl sm:text-2xl">🎵</span>

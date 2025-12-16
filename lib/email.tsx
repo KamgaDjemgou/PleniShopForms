@@ -7,57 +7,40 @@ interface OrderData {
   phone: string
   email: string
   currency: "EUR" | "FCFA"
-  selectedPack: string
+  selectedModule: string
   accompanimentPacks: { [key: string]: number }
   comments: string
   paymentFrequency: "monthly" | "quarterly" | "biannual" | "annual"
   paymentMethod: "bank" | "mobile" | "paypal"
   totalPrice: number
-  mainPackTotal: number
+  modulesTotal: number
   accompanimentTotal: number
 }
 
-const PACKS = [
-  { id: "free", name: "Pack Free", description: "50 chants harmonisés (Gratuit)", priceEUR: 0, priceFCFA: 0 },
+const MODULES_CHADAH = [
   {
-    id: "david",
-    name: "Pack David",
-    description: "100 chants harmonisés/orchestrés, réservé à une seule personne",
-    priceEUR: 20,
-    priceFCFA: 10000,
-    monthly: true,
+    id: "chant",
+    name: "Chant",
+    description: "Apprenez à chanter et à harmoniser les cantiques",
+    icon: "🎤",
   },
   {
-    id: "ekklesia1",
-    name: "Pack Ekklesia 1",
-    description: "Tous les chants harmonisés/orchestrés, groupe de 1 à 10 personnes",
-    priceEUR: 100,
-    priceFCFA: 50000,
-    monthly: true,
+    id: "piano",
+    name: "Piano",
+    description: "Apprenez à jouer au piano et à accompagner les cantiques",
+    icon: "🎹",
   },
   {
-    id: "ekklesia2",
-    name: "Pack Ekklesia 2",
-    description: "Tous les chants harmonisés/orchestrés, groupe de 11 à 50 personnes",
-    priceEUR: 200,
-    priceFCFA: 100000,
-    monthly: true,
+    id: "guitare",
+    name: "Guitare",
+    description: "Apprenez à jouer à la guitare et à accompagner les cantiques",
+    icon: "🎸",
   },
   {
-    id: "ekklesia3",
-    name: "Pack Ekklesia 3",
-    description: "Tous les chants harmonisés/orchestrés, groupe de 51 à 100 personnes",
-    priceEUR: 300,
-    priceFCFA: 150000,
-    monthly: true,
-  },
-  {
-    id: "ekklesia4",
-    name: "Pack Ekklesia 4",
-    description: "Tous les chants harmonisés/orchestrés, groupe de plus de 100 personnes",
-    priceEUR: 300,
-    priceFCFA: 200000,
-    monthly: true,
+    id: "percussion",
+    name: "Percussion",
+    description: "Apprenez à jouer aux percussions et à accompagner les cantiques",
+    icon: "🥁",
   },
 ]
 
@@ -160,7 +143,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
       },
     })
 
-    const selectedPack = PACKS.find((p) => p.id === orderData.selectedPack)
+    const selectedModule = MODULES_CHADAH.find((m) => m.id === orderData.selectedModule)
     const selectedAccompanimentPacks = Object.entries(orderData.accompanimentPacks)
       .filter(([_, quantity]) => quantity > 0)
       .map(([packId, quantity]) => {
@@ -186,13 +169,9 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
           <strong>🇨🇮 Côte d'Ivoire (Orange / Wave):</strong> +2250703833108<br>
           <strong>🇧🇫 Burkina Faso (Orange):</strong> +22654725339<br>
           <strong>🇸🇳 Sénégal (Orange / Wave):</strong> +221775091447<br>
-          <strong>🇬🇦 Gabon (Airtel):</strong> +24160271771
+          <strong>🇬🇦 Gabon (Airtel):</strong> +24177309444
         `,
-      },
-      paypal: {
-        title: "💳 Par PayPal",
-        details: `<strong>Lien:</strong> <a href="https://paypal.me/chadahmusic" target="_blank">paypal.me/chadahmusic</a>`,
-      },
+      }
     }
 
     const currentPaymentDetails = paymentDetails[orderData.paymentMethod as keyof typeof paymentDetails]
@@ -202,50 +181,46 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Confirmation de commande - PleniHarmony</title>
+        <title>Confirmation d'inscription - Chadah Academy</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background: linear-gradient(135deg, #8B5A3C, #A0522D); color: white; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
           .section { background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #8B5A3C; }
-          .pack-main { background: linear-gradient(135deg, #8B5A3C, #A0522D); color: white; padding: 20px; text-align: center; border-radius: 8px; margin: 15px 0; }
+          .module-main { background: linear-gradient(135deg, #8B5A3C, #A0522D); color: white; padding: 20px; text-align: center; border-radius: 8px; margin: 15px 0; }
           .pack-accompaniment { background: linear-gradient(135deg, #228B22, #32CD32); color: white; padding: 20px; text-align: center; border-radius: 8px; margin: 15px 0; }
           .important-note { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 15px 0; }
           .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }
           .payment-details { background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 10px 0; }
+          a { color: #8B5A3C; }
         </style>
       </head>
       <body>
         <div class="header">
-          <h1>🎵 Confirmation de commande</h1>
-          <p>Merci pour votre commande PleniHarmony!</p>
+          <h1>🎵 Confirmation d'inscription</h1>
+          <p>Merci pour votre inscription à Chadah Academy!</p>
         </div>
 
         <div class="section">
           <h3>👤 Informations personnelles</h3>
           <p><strong>Nom:</strong> ${orderData.name}</p>
           <p><strong>Téléphone:</strong> ${orderData.phone}</p>
+          <p><strong>Email:</strong> ${orderData.email}</p>
           <p><strong>Devise:</strong> ${orderData.currency}</p>
         </div>
 
         ${
-          selectedPack
+          selectedModule
             ? `
         <div class="section">
-          <h3>🎵 Pack principal sélectionné</h3>
-          <p><strong>${selectedPack.name}</strong></p>
-          <p>${selectedPack.description}</p>
-          ${
-            selectedPack.priceEUR > 0
-              ? `
-            <p><strong>Fréquence:</strong> ${getFrequencyLabel(orderData.paymentFrequency)}</p>
-            <div class="pack-main">
-              <h3>Pack Principal</h3>
-              <p>${getFrequencyLabel(orderData.paymentFrequency)}</p>
-              <h2>${orderData.mainPackTotal.toLocaleString()} ${orderData.currency}</h2>
-            </div>
-          `
-              : `<p style="color: #228B22; font-weight: bold;">✨ Gratuit</p>`
-          }
+          <h3>${selectedModule.icon} Module Chadah sélectionné</h3>
+          <p><strong>${selectedModule.name}</strong></p>
+          <p>${selectedModule.description}</p>
+          <p><strong>Fréquence:</strong> ${getFrequencyLabel(orderData.paymentFrequency)}</p>
+          <div class="module-main">
+            <h3>Module Chadah - ${selectedModule.name}</h3>
+            <p>${getFrequencyLabel(orderData.paymentFrequency)}</p>
+            <h2>${orderData.modulesTotal.toLocaleString()} ${orderData.currency}</h2>
+          </div>
         </div>
         `
             : ""
@@ -255,7 +230,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
           selectedAccompanimentPacks.length > 0
             ? `
         <div class="section">
-          <h3>🎹 Packs d'accompagnement</h3>
+          <h3>🎹 Pack(s) d'accompagnement</h3>
           ${selectedAccompanimentPacks
             .map(({ pack, quantity }) => {
               if (!pack) return ""
@@ -270,7 +245,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
             })
             .join("")}
           <div class="pack-accompaniment">
-            <h3>Packs d'Accompagnement</h3>
+            <h3>Pack(s) d'Accompagnement</h3>
             <h2>${orderData.accompanimentTotal.toLocaleString()} ${orderData.currency}</h2>
           </div>
         </div>
@@ -281,16 +256,18 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
         <div class="section">
           <h3>💳 Informations de paiement</h3>
           ${
-            orderData.mainPackTotal > 0
+            orderData.modulesTotal > 0
               ? `<p><strong>Fréquence:</strong> ${getFrequencyLabel(orderData.paymentFrequency)}</p>`
               : ""
           }
           <p><strong>Moyen de paiement:</strong> ${getPaymentMethodLabel(orderData.paymentMethod)}</p>
           
+          ${currentPaymentDetails ? `
           <div class="payment-details">
             <h4>${currentPaymentDetails.title}</h4>
             <div>${currentPaymentDetails.details}</div>
           </div>
+          ` : ""}
         </div>
 
         ${
@@ -306,20 +283,17 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
 
         <div class="important-note">
           <h3>⚠️ NOTE IMPORTANTE</h3>
-          <p>Vous avez la possibilité une fois abonné(e) de :</p>
           <ul>
-            <li>soit demander une harmonisation (voix) ou une instrumentation (instrument piano ou guitare ou bass ou batterie) d'un chant donné à l'équipe PLENIHARMONY (${
-              orderData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"
-            } si votre proposition est retenue).</li>
-            <li>soit proposer à PLENIHARMONY votre propre harmonisation ou instrumentation pour enrichir la base de chants (dans ce cas, PLENIHARMONY vous paiera ${
-              orderData.currency === "FCFA" ? "10.000 FCFA" : "20 EUR"
-            } si votre proposition est retenue).</li>
+            <li>Rejoignez si ce n'est pas encore fait notre groupe WhatsApp d'information Chadah Academy : <a href="https://chat.whatsapp.com/EOn3a8doHhg3PgV33tbzst">Rejoindre le groupe</a></li>
+            <li>Vous serez rajouté(e) à un autre groupe WhatsApp de travail pour des séances ponctuelles communes avec le formateur, selon les disponibilités</li>
+            <li>Votre inscription confirmée (par paiement) vous donnera accès à la plateforme e-learning de Chadah Academy avec les cours relatifs au module de formation choisi</li>
           </ul>
         </div>
 
         <div class="footer">
-          <p>Merci de votre confiance !</p>
-          <p><strong>Équipe PleniHarmony</strong></p>
+          <p>Merci de votre confiance ! 🎵</p>
+          <p><strong>Équipe CHADAH</strong></p>
+          <p>L'équipe CHADAH est ravie de vous accompagner dans votre parcours musical.</p>
           <p>Pour toute question, n'hésitez pas à nous contacter.</p>
         </div>
       </body>
@@ -329,7 +303,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
       from: process.env.SMTP_USER,
       to: orderData.email,
       cc: process.env.PLENISOFTS_EMAIL,
-      subject: `Confirmation de commande - PleniHarmony - ${orderData.name}`,
+      subject: `Confirmation d'inscription - Chadah Academy - ${orderData.name}`,
       html: htmlContent
     }
 

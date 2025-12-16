@@ -5,16 +5,29 @@ import { google } from "googleapis"
 interface FormSubmissionData {
   name: string
   phone: string
-  countryCode: string
   email: string
   currency: "EUR" | "FCFA"
-  selectedPack: string
+  selectedModule: string
   accompanimentPacks: { [key: string]: number }
   comments: string
   paymentFrequency: "monthly" | "quarterly" | "biannual" | "annual"
   paymentMethod: "bank" | "mobile" | "paypal"
   totalPrice: number
+  modulesTotal: number
+  accompanimentTotal: number
 }
+
+// Modules Chadah
+const MODULES_CHADAH = [
+  { id: "chant", name: "Chant" },
+  { id: "piano", name: "Piano" },
+  { id: "guitare", name: "Guitare" },
+  { id: "percussion", name: "Percussion" },
+]
+
+// Prix unique pour tous les modules: 20 EUR ou 10.000 FCFA / mois
+const MODULE_PRICE_EUR = 20
+const MODULE_PRICE_FCFA = 10000
 
 export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ success: boolean; message: string }> {
   try {
@@ -38,7 +51,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
 
     const existingData = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Commandes!A1:S1",
+      range: "Inscriptions!A1:S1",
     })
 
     const hasHeaders = existingData.data.values && existingData.data.values.length > 0
@@ -50,7 +63,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
         "Téléphone",
         "Email",
         "Devise",
-        "Pack Choisi",
+        "Module Chadah",
         "Fréquence Paiement",
         "Moyen Paiement",
         "Pack Asaph",
@@ -61,14 +74,14 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
         "Pack Heman 2",
         "Pack Heman 3",
         "Pack Heman 4",
-        "Total Pack Principal",
+        "Total Module",
         "Total Accompagnement",
         "Commentaires",
       ]
 
       await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: "Commandes!A:S",
+        range: "Inscriptions!A:S",
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: [headers],
@@ -76,25 +89,30 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
       })
     }
 
-    const calculatePackTotals = () => {
-      let mainPackTotal = 0
+    const getFrequencyMultiplier = (frequency: string) => {
+      switch (frequency) {
+        case "monthly":
+          return 1
+        case "quarterly":
+          return 3
+        case "biannual":
+          return 6
+        case "annual":
+          return 12
+        default:
+          return 1
+      }
+    }
+
+    const calculateTotals = () => {
+      let modulesTotal = 0
       let accompanimentTotal = 0
 
-      // Calculate main pack total with frequency
-      const PACKS = [
-        { id: "free", priceEUR: 0, priceFCFA: 0 },
-        { id: "david", priceEUR: 20, priceFCFA: 10000 },
-        { id: "ekklesia1", priceEUR: 100, priceFCFA: 50000 },
-        { id: "ekklesia2", priceEUR: 200, priceFCFA: 100000 },
-        { id: "ekklesia3", priceEUR: 300, priceFCFA: 150000 },
-        { id: "ekklesia4", priceEUR: 300, priceFCFA: 200000 },
-      ]
-
-      const pack = PACKS.find((p) => p.id === data.selectedPack)
-      if (pack && pack.priceEUR > 0) {
-        const basePrice = data.currency === "EUR" ? pack.priceEUR : pack.priceFCFA
+      // Calculate module total with frequency
+      if (data.selectedModule) {
+        const basePrice = data.currency === "EUR" ? MODULE_PRICE_EUR : MODULE_PRICE_FCFA
         const frequencyMultiplier = getFrequencyMultiplier(data.paymentFrequency)
-        mainPackTotal = basePrice * frequencyMultiplier
+        modulesTotal = basePrice * frequencyMultiplier
       }
 
       // Calculate accompaniment total
@@ -117,22 +135,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
         }
       })
 
-      return { mainPackTotal, accompanimentTotal }
-    }
-
-    const getFrequencyMultiplier = (frequency: string) => {
-      switch (frequency) {
-        case "monthly":
-          return 1
-        case "quarterly":
-          return 3
-        case "biannual":
-          return 6
-        case "annual":
-          return 12
-        default:
-          return 1
-      }
+      return { modulesTotal, accompanimentTotal }
     }
 
     const getFrequencyLabel = (frequency: string) => {
@@ -163,7 +166,12 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
       }
     }
 
-    const totals = calculatePackTotals()
+    const getModuleName = (moduleId: string) => {
+      const module = MODULES_CHADAH.find((m) => m.id === moduleId)
+      return module ? module.name : moduleId
+    }
+
+    const totals = calculateTotals()
 
     const accompanimentColumns = [
       data.accompanimentPacks["asaph"] || 0,
@@ -182,18 +190,18 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
       data.phone,
       data.email,
       data.currency,
-      data.selectedPack,
+      getModuleName(data.selectedModule),
       getFrequencyLabel(data.paymentFrequency),
       getPaymentMethodLabel(data.paymentMethod),
       ...accompanimentColumns,
-      totals.mainPackTotal > 0 ? `${totals.mainPackTotal} ${data.currency}` : "0",
+      totals.modulesTotal > 0 ? `${totals.modulesTotal} ${data.currency}` : "0",
       totals.accompanimentTotal > 0 ? `${totals.accompanimentTotal} ${data.currency}` : "0",
       data.comments || "Aucun commentaire",
     ]
 
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Commandes!A:S",
+      range: "Inscriptions!A:S",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [rowData],
@@ -203,7 +211,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
     if (response.status === 200) {
       return {
         success: true,
-        message: "Commande enregistrée avec succès dans Google Sheets!",
+        message: "Inscription enregistrée avec succès dans Google Sheets!",
       }
     } else {
       throw new Error(`Google Sheets API error: ${response.status}`)

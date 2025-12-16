@@ -1,7 +1,8 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, Music, RotateCcw, Piano } from "lucide-react"
+import { CheckCircle, Music, RotateCcw, Piano, Home } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
@@ -9,9 +10,10 @@ export default function SuccessPage() {
   const searchParams = useSearchParams()
   const orderTotal = searchParams.get("total")
   const currency = searchParams.get("currency")
-  const mainPackTotal = searchParams.get("mainPackTotal")
+  const modulesTotal = searchParams.get("modulesTotal")
   const accompanimentTotal = searchParams.get("accompanimentTotal")
   const frequency = searchParams.get("frequency")
+  const selectedModule = searchParams.get("module")
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
@@ -20,46 +22,57 @@ export default function SuccessPage() {
           <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
             <CheckCircle className="h-8 w-8 text-green-600" />
           </div>
-          <CardTitle className="text-2xl md:text-3xl font-bold text-green-700 mb-2">Commande Confirmée !</CardTitle>
-          <p className="text-muted-foreground text-lg">Votre commande a été enregistrée avec succès</p>
+          <CardTitle className="text-2xl md:text-3xl font-bold text-green-700 mb-2">Inscription Enregistrée !</CardTitle>
+          <p className="text-muted-foreground text-lg">Votre inscription a été enregistrée avec succès.</p>
         </CardHeader>
 
         <CardContent className="space-y-6 text-center">
-          {orderTotal && currency && (
-            <div className="space-y-4">
-              {mainPackTotal && Number.parseInt(mainPackTotal) > 0 && (
-                <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg border border-primary/20">
-                  <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
-                    <Music className="h-5 w-5 text-primary" />
-                    Pack Principal {frequency && `(${frequency})`}
-                  </h3>
-                  <p className="text-3xl font-bold text-primary">
-                    {Number.parseInt(mainPackTotal).toLocaleString()} {currency}
-                  </p>
-                </div>
-              )}
+          {/* Module et Packs sélectionnés */}
+          <div className="space-y-4">
+            {modulesTotal && Number.parseInt(modulesTotal) > 0 && (
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg border border-primary/20">
+                <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
+                  <Music className="h-5 w-5 text-primary" />
+                  Module Chadah {selectedModule && `- ${selectedModule}`}
+                </h3>
+                {frequency && <p className="text-sm text-muted-foreground mb-2">Fréquence: {frequency}</p>}
+                <p className="text-3xl font-bold text-primary">
+                  {Number.parseInt(modulesTotal).toLocaleString()} {currency}
+                </p>
+              </div>
+            )}
 
-              {accompanimentTotal && Number.parseInt(accompanimentTotal) > 0 && (
-                <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 p-6 rounded-lg border border-secondary/20">
-                  <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
-                    <Piano className="h-5 w-5 text-secondary" />
-                    Packs d'Accompagnement
-                  </h3>
-                  <p className="text-3xl font-bold text-secondary">
-                    {Number.parseInt(accompanimentTotal).toLocaleString()} {currency}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+            {accompanimentTotal && Number.parseInt(accompanimentTotal) > 0 && (
+              <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 p-6 rounded-lg border border-secondary/20">
+                <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
+                  <Piano className="h-5 w-5 text-secondary" />
+                  Pack(s) d'Accompagnement
+                </h3>
+                <p className="text-3xl font-bold text-secondary">
+                  {Number.parseInt(accompanimentTotal).toLocaleString()} {currency}
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* Success Message */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-800 mb-3">Que se passe-t-il maintenant ?</h3>
-            <div className="text-sm text-green-700 space-y-2 text-left">
-              <p>✅ Votre commande a été enregistrée dans notre système</p>
-              <p>✅ Notre équipe PLENIHARMONY vous contactera pour finaliser votre abonnement</p>
-              <p>✅ Vous aurez accès à vos packs selon les modalités choisies</p>
+            <h3 className="text-lg font-semibold text-green-800 mb-4">Que se passe-t-il maintenant ?</h3>
+            <div className="text-sm text-green-700 space-y-3 text-left">
+              <p>✅ Votre inscription a été enregistrée dans notre système.</p>
+              <p>
+                ✅ Rejoignez notre groupe WhatsApp Chadah Academy si ce n'est pas encore fait :{" "}
+                <a
+                  href="https://chat.whatsapp.com/EOn3a8doHhg3PgV33tbzst"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-medium"
+                >
+                  Rejoindre le groupe
+                </a>
+              </p>
+              <p>✅ Notre équipe Chadah vous contactera pour finaliser votre inscription</p>
+              <p>✅ Vous aurez alors accès à la plateforme de formation et à vos packs selon les modalités choisies</p>
             </div>
           </div>
 
@@ -75,14 +88,15 @@ export default function SuccessPage() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <Button asChild className="flex-1" size="lg">
-              <Link href="/order" className="flex items-center justify-center gap-2">
+              <Link href="/inscription" className="flex items-center justify-center gap-2">
                 <RotateCcw className="h-4 w-4" />
-                Nouvelle Commande
+                Nouvelle inscription
               </Link>
             </Button>
             <Button asChild variant="outline" className="flex-1 bg-transparent" size="lg">
               <Link href="/" className="flex items-center justify-center gap-2">
-                Retour à l'accueil
+                <Home className="h-4 w-4" />
+                Retour à la page d'accueil
               </Link>
             </Button>
           </div>
@@ -91,8 +105,18 @@ export default function SuccessPage() {
           <div className="pt-4 border-t">
             <p className="text-lg font-medium text-primary mb-2">Merci de votre confiance ! 🎵</p>
             <p className="text-sm text-muted-foreground">
-              L'équipe PLENIHARMONY est ravie de vous accompagner dans votre parcours musical.
+              L'équipe CHADAH est ravie de vous accompagner dans votre parcours musical.
             </p>
+          </div>
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <Image
+              src="/images/full-chadah-logo.jpg"
+              alt="Chadah Academy Logo"
+              width={120}
+              height={80}
+              className="object-contain w-24 h-auto sm:w-32 md:w-40"
+              priority
+            />
           </div>
         </CardContent>
       </Card>
