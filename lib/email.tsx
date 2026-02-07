@@ -13,7 +13,6 @@ interface FormSubmissionData {
   country: string
   currency: "EUR" | "FCFA"
   productSetupOption: "self" | "assistance"
-  excelFileName?: string
   selectedPackage: "free" | "starter" | "pro" | "enterprise"
   packagePrice: number
   packageName: string
@@ -133,11 +132,6 @@ export async function sendOrderConfirmationEmail(orderData: FormSubmissionData) 
         <div class="section">
           <h3>📦 Configuration des Produits</h3>
           <p><strong>Option sélectionnée:</strong> ${orderData.productSetupOption === "self" ? "Paramétrage personnel" : "Assistance PLENISOFTS"}</p>
-          ${
-            orderData.productSetupOption === "assistance" && orderData.excelFileName
-              ? `<p><strong>Fichier Excel fourni:</strong> ${orderData.excelFileName}</p>`
-              : ""
-          }
           ${
             orderData.productSetupOption === "assistance"
               ? `

@@ -13,7 +13,6 @@ interface FormSubmissionData {
   country: string
   currency: "EUR" | "FCFA"
   productSetupOption: "self" | "assistance"
-  excelFileName?: string
   selectedPackage: "free" | "starter" | "pro" | "enterprise"
   packagePrice: number
   packageName: string
@@ -43,7 +42,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
 
     const existingData = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "PleniShop!A1:N1",
+      range: "Inscriptions!A1:N1",
     })
 
     const hasHeaders = existingData.data.values && existingData.data.values.length > 0
@@ -69,7 +68,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
 
       await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: "PleniShop!A:O",
+        range: "Inscriptions!A:O",
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: [headers],
@@ -89,7 +88,6 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
       data.country,
       data.currency,
       data.productSetupOption === "self" ? "Paramétrage personnel" : "Assistance PLENISOFTS",
-      data.excelFileName || "-",
       data.packageName,
       `${data.packagePrice} ${data.currency}`,
       data.comments || "-",
@@ -97,7 +95,7 @@ export async function saveToGoogleSheets(data: FormSubmissionData): Promise<{ su
 
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "PleniShop!A:O",
+      range: "Inscriptions!A:O",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [rowData],
