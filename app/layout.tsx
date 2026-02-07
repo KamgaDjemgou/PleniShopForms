@@ -10,13 +10,13 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Inscription Chadah Academy",
-  description: "Formulaire d'inscription à Chadah Academy - Formation en ligne de musique et production musicale",
-  generator: "Chadah Academy Forms",
+  title: "PleniShop - Créez votre Boutique en Ligne",
+  description: "Plateforme de commerce électronique PleniShop - Créez et gérez votre boutique en ligne facilement",
+  generator: "PleniShop",
   icons: {
-    icon: "/images/chadah-logo.jpg",
-    shortcut: "/images/chadah-logo.jpg",
-    apple: "/images/chadah-logo.jpg",
+    icon: "/images/plenisofts-logo.png",
+    shortcut: "/images/plenisofts-logo.png",
+    apple: "/images/plenisofts-logo.png",
   },
 }
 

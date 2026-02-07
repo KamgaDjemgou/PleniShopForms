@@ -2,136 +2,75 @@
 
 import nodemailer from "nodemailer"
 
-interface OrderData {
-  name: string
-  phone: string
-  email: string
+interface FormSubmissionData {
+  managerName: string
+  managerEmail: string
+  managerPhone: string
+  shopName: string
+  shopEmail: string
+  shopPhone: string
+  city: string
+  country: string
   currency: "EUR" | "FCFA"
-  selectedModule: string
-  accompanimentPacks: { [key: string]: number }
+  productSetupOption: "self" | "assistance"
+  excelFileName?: string
+  selectedPackage: "free" | "starter" | "pro" | "enterprise"
+  packagePrice: number
+  packageName: string
   comments: string
-  paymentFrequency: "monthly" | "quarterly" | "biannual" | "annual"
-  paymentMethod: "bank" | "mobile" | "paypal"
-  totalPrice: number
-  modulesTotal: number
-  accompanimentTotal: number
+  submittedAt: string
 }
 
-const MODULES_CHADAH = [
-  {
-    id: "chant",
-    name: "Chant",
-    description: "Apprenez à chanter et à harmoniser les cantiques",
-    icon: "🎤",
+const PACKAGES_INFO = {
+  free: {
+    name: "Free",
+    icon: "🎁",
+    features: ["5 produits", "10 commandes par mois", "Support par email"],
   },
-  {
-    id: "piano",
-    name: "Piano",
-    description: "Apprenez à jouer au piano et à accompagner les cantiques",
-    icon: "🎹",
+  starter: {
+    name: "Starter",
+    icon: "🚀",
+    features: [
+      "50 produits",
+      "100 commandes par mois",
+      "Domaine personnalisé",
+      "Support prioritaire",
+      "Statistiques avancées",
+      "Export des données",
+    ],
   },
-  {
-    id: "guitare",
-    name: "Guitare",
-    description: "Apprenez à jouer à la guitare et à accompagner les cantiques",
-    icon: "🎸",
+  pro: {
+    name: "Pro",
+    icon: "⭐",
+    features: [
+      "500 produits",
+      "1000 commandes par mois",
+      "Domaine personnalisé",
+      "Support prioritaire 24/7",
+      "Statistiques avancées",
+      "Export des données",
+      "Multi-devises",
+      "Multi-langues",
+      "Intégrations avancées",
+    ],
   },
-  {
-    id: "percussion",
-    name: "Percussion",
-    description: "Apprenez à jouer aux percussions et à accompagner les cantiques",
-    icon: "🥁",
+  enterprise: {
+    name: "Enterprise",
+    icon: "👑",
+    features: [
+      "Produits illimités",
+      "Commandes illimitées",
+      "Domaine personnalisé",
+      "Support dédié",
+      "Toutes les fonctionnalités Pro",
+      "API personnalisé",
+      "Formation dédiée",
+      "Gestion multi-boutiques",
+    ],
   },
-]
-
-const ACCOMPANIMENT_PACKS = [
-  {
-    id: "asaph",
-    name: "Pack Asaph",
-    description: "Écriture de chant chrétien",
-    priceEUR: 10,
-    priceFCFA: 5000,
-  },
-  {
-    id: "ethan1",
-    name: "Pack Ethan 1",
-    description: "Instrumentation Piano/Guitare",
-    priceEUR: 20,
-    priceFCFA: 10000,
-  },
-  {
-    id: "ethan2",
-    name: "Pack Ethan 2",
-    description: "Instrumentation Piano/Bass/Rythmique",
-    priceEUR: 100,
-    priceFCFA: 50000,
-  },
-  {
-    id: "ethan3",
-    name: "Pack Ethan 3",
-    description: "Instrumentation enrichie",
-    priceEUR: 300,
-    priceFCFA: 150000,
-  },
-  {
-    id: "heman1",
-    name: "Pack Heman 1",
-    description: "Conduite de Louange",
-    priceEUR: 20,
-    priceFCFA: 10000,
-  },
-  {
-    id: "heman2",
-    name: "Pack Heman 2",
-    description: "Production SON (studio)",
-    priceEUR: 400,
-    priceFCFA: 200000,
-  },
-  {
-    id: "heman3",
-    name: "Pack Heman 3",
-    description: "Production VIDEO (clip)",
-    priceEUR: 1000,
-    priceFCFA: 500000,
-  },
-  {
-    id: "heman4",
-    name: "Pack Heman 4",
-    description: "Déploiement sur les réseaux sociaux",
-    priceEUR: 20,
-    priceFCFA: 50000,
-  },
-]
-
-const getFrequencyLabel = (frequency: string) => {
-  switch (frequency) {
-    case "monthly":
-      return "Mensuelle"
-    case "quarterly":
-      return "Trimestrielle"
-    case "biannual":
-      return "Semestrielle"
-    case "annual":
-      return "Annuelle"
-    default:
-      return "Mensuelle"
-  }
 }
 
-const getPaymentMethodLabel = (method: string) => {
-  switch (method) {
-    case "bank":
-      return "Virement / Transfert"
-    case "mobile":
-      return "Mobile Money"
-    case "paypal":
-      return "PayPal"
-    default:
-      return method
-  }
-}
-
-export async function sendOrderConfirmationEmail(orderData: OrderData) {
+export async function sendOrderConfirmationEmail(orderData: FormSubmissionData) {
   try {
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -143,168 +82,139 @@ export async function sendOrderConfirmationEmail(orderData: OrderData) {
       },
     })
 
-    const selectedModule = MODULES_CHADAH.find((m) => m.id === orderData.selectedModule)
-    const selectedAccompanimentPacks = Object.entries(orderData.accompanimentPacks)
-      .filter(([_, quantity]) => quantity > 0)
-      .map(([packId, quantity]) => {
-        const pack = ACCOMPANIMENT_PACKS.find((p) => p.id === packId)
-        return { pack, quantity }
-      })
-      .filter(({ pack }) => pack)
-
-    const paymentDetails = {
-      bank: {
-        title: "🏦 Par Virement / Versement / Transfert (RIA, MoneyGram, WU)",
-        details: `
-          <strong>IBAN:</strong> MA64 013 780 0117320100800123 48<br>
-          <strong>RIB:</strong> 013 780 0117320100800123 48<br>
-          <strong>Code SWIFT:</strong> BMCIMAMC<br>
-          <strong>Titulaire:</strong> DOGBRE SOKORA JEAN-CHRISTOPHE<br>
-          <strong>Adresse:</strong> Casablanca, Maroc
-        `,
-      },
-      mobile: {
-        title: "📱 Par Mobile Money",
-        details: `
-          <strong>🇨🇮 Côte d'Ivoire (Orange / Wave):</strong> +2250703833108<br>
-          <strong>🇧🇫 Burkina Faso (Orange):</strong> +22654725339<br>
-          <strong>🇸🇳 Sénégal (Orange / Wave):</strong> +221775091447<br>
-          <strong>🇬🇦 Gabon (Airtel):</strong> +24177309444
-        `,
-      }
-    }
-
-    const currentPaymentDetails = paymentDetails[orderData.paymentMethod as keyof typeof paymentDetails]
+    const packageInfo = PACKAGES_INFO[orderData.selectedPackage as keyof typeof PACKAGES_INFO]
 
     const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Confirmation d'inscription - Chadah Academy</title>
+        <title>Inscription PleniShop Confirmée</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #8B5A3C, #A0522D); color: white; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
-          .section { background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #8B5A3C; }
-          .module-main { background: linear-gradient(135deg, #8B5A3C, #A0522D); color: white; padding: 20px; text-align: center; border-radius: 8px; margin: 15px 0; }
-          .pack-accompaniment { background: linear-gradient(135deg, #228B22, #32CD32); color: white; padding: 20px; text-align: center; border-radius: 8px; margin: 15px 0; }
-          .important-note { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 15px 0; }
+          .header { background: linear-gradient(135deg, #1a5a3d, #2d8a6f); color: white; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
+          .logo { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+          .section { background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #1a5a3d; }
+          .package-highlight { background: linear-gradient(135deg, #4a90e2, #357abd); color: white; padding: 20px; text-align: center; border-radius: 8px; margin: 15px 0; }
+          .setup-info { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 15px 0; }
+          .features-list { list-style: none; padding: 0; }
+          .features-list li { padding: 5px 0; padding-left: 20px; position: relative; }
+          .features-list li:before { content: "✓"; position: absolute; left: 0; color: #1a5a3d; font-weight: bold; }
           .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }
-          .payment-details { background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 10px 0; }
-          a { color: #8B5A3C; }
+          .contact-info { background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 10px 0; }
+          a { color: #1a5a3d; text-decoration: none; }
+          a:hover { text-decoration: underline; }
+          .warning { color: #d9534f; font-weight: bold; }
         </style>
       </head>
       <body>
         <div class="header">
-          <h1>🎵 Confirmation d'inscription</h1>
-          <p>Merci pour votre inscription à Chadah Academy!</p>
+          <div class="logo">PleniShop</div>
+          <h1>✅ Inscription Confirmée!</h1>
+          <p>Votre boutique en ligne a été enregistrée avec succès</p>
         </div>
 
         <div class="section">
-          <h3>👤 Informations personnelles</h3>
-          <p><strong>Nom:</strong> ${orderData.name}</p>
-          <p><strong>Téléphone:</strong> ${orderData.phone}</p>
-          <p><strong>Email:</strong> ${orderData.email}</p>
+          <h3>👤 Informations du Gérant</h3>
+          <p><strong>Nom:</strong> ${orderData.managerName}</p>
+          <p><strong>Email:</strong> ${orderData.managerEmail}</p>
+          <p><strong>Téléphone:</strong> ${orderData.managerPhone || "Non fourni"}</p>
+        </div>
+
+        <div class="section">
+          <h3>🏪 Informations de la Boutique</h3>
+          <p><strong>Nom:</strong> ${orderData.shopName}</p>
+          <p><strong>Email:</strong> ${orderData.shopEmail}</p>
+          <p><strong>Téléphone:</strong> ${orderData.shopPhone || "Non fourni"}</p>
+          <p><strong>Localisation:</strong> ${orderData.city}, ${orderData.country}</p>
           <p><strong>Devise:</strong> ${orderData.currency}</p>
         </div>
 
-        ${
-          selectedModule
-            ? `
         <div class="section">
-          <h3>${selectedModule.icon} Module Chadah sélectionné</h3>
-          <p><strong>${selectedModule.name}</strong></p>
-          <p>${selectedModule.description}</p>
-          <p><strong>Fréquence:</strong> ${getFrequencyLabel(orderData.paymentFrequency)}</p>
-          <div class="module-main">
-            <h3>Module Chadah - ${selectedModule.name}</h3>
-            <p>${getFrequencyLabel(orderData.paymentFrequency)}</p>
-            <h2>${orderData.modulesTotal.toLocaleString()} ${orderData.currency}</h2>
-          </div>
-        </div>
-        `
-            : ""
-        }
-
-        ${
-          selectedAccompanimentPacks.length > 0
-            ? `
-        <div class="section">
-          <h3>🎹 Pack(s) d'accompagnement</h3>
-          ${selectedAccompanimentPacks
-            .map(({ pack, quantity }) => {
-              if (!pack) return ""
-              const price = orderData.currency === "EUR" ? pack.priceEUR : pack.priceFCFA
-              return `
-                <div style="margin: 10px 0; padding: 10px; background: white; border-radius: 5px;">
-                  <p><strong>${pack.name}</strong> x${quantity}</p>
-                  <p style="color: #666; font-size: 14px;">${pack.description}</p>
-                  <p style="color: #228B22; font-weight: bold;">${(price * quantity).toLocaleString()} ${orderData.currency}</p>
-                </div>
-              `
-            })
-            .join("")}
-          <div class="pack-accompaniment">
-            <h3>Pack(s) d'Accompagnement</h3>
-            <h2>${orderData.accompanimentTotal.toLocaleString()} ${orderData.currency}</h2>
-          </div>
-        </div>
-        `
-            : ""
-        }
-
-        <div class="section">
-          <h3>💳 Informations de paiement</h3>
+          <h3>📦 Configuration des Produits</h3>
+          <p><strong>Option sélectionnée:</strong> ${orderData.productSetupOption === "self" ? "Paramétrage personnel" : "Assistance PLENISOFTS"}</p>
           ${
-            orderData.modulesTotal > 0
-              ? `<p><strong>Fréquence:</strong> ${getFrequencyLabel(orderData.paymentFrequency)}</p>`
+            orderData.productSetupOption === "assistance" && orderData.excelFileName
+              ? `<p><strong>Fichier Excel fourni:</strong> ${orderData.excelFileName}</p>`
               : ""
           }
-          <p><strong>Moyen de paiement:</strong> ${getPaymentMethodLabel(orderData.paymentMethod)}</p>
-          
-          ${currentPaymentDetails ? `
-          <div class="payment-details">
-            <h4>${currentPaymentDetails.title}</h4>
-            <div>${currentPaymentDetails.details}</div>
+          ${
+            orderData.productSetupOption === "assistance"
+              ? `
+          <div class="setup-info">
+            <p>Notre équipe PLENISOFTS va examiner votre dossier et mettre en place votre boutique selon vos spécifications.</p>
+            <p><strong>Prochaines étapes:</strong></p>
+            <ul>
+              <li>Dézippez le modèle téléchargé</li>
+              <li>Remplissez le fichier Excel et les images selon les consignes</li>
+              <li>Rezippez le dossier</li>
+              <li>Envoyez-le à : <strong>support@plenisofts.org</strong></li>
+            </ul>
           </div>
-          ` : ""}
+          `
+              : ""
+          }
+        </div>
+
+        <div class="section">
+          <h3>${packageInfo.icon} Pack Sélectionné</h3>
+          <p><strong>Pack:</strong> ${packageInfo.name}</p>
+          ${packageInfo.name !== "Free" ? `<p><strong>Prix:</strong> ${orderData.packagePrice} ${orderData.currency}</p>` : `<p><strong>Prix:</strong> Gratuit</p>`}
+          
+          <h4>Inclus dans le pack ${packageInfo.name}:</h4>
+          <ul class="features-list">
+            ${packageInfo.features.map((feature) => `<li>${feature}</li>`).join("")}
+          </ul>
         </div>
 
         ${
           orderData.comments
             ? `
         <div class="section">
-          <h3>💬 Vos commentaires</h3>
+          <h3>💬 Vos Commentaires</h3>
           <p>${orderData.comments}</p>
         </div>
         `
             : ""
         }
 
-        <div class="important-note">
-          <h3>⚠️ NOTE IMPORTANTE</h3>
-          <ul>
-            <li>Rejoignez si ce n'est pas encore fait notre groupe WhatsApp d'information Chadah Academy : <a href="https://chat.whatsapp.com/EOn3a8doHhg3PgV33tbzst">Rejoindre le groupe</a></li>
-            <li>Vous serez rajouté(e) à un autre groupe WhatsApp de travail pour des séances ponctuelles communes avec le formateur, selon les disponibilités</li>
-            <li>Votre inscription confirmée (par paiement) vous donnera accès à la plateforme e-learning de Chadah Academy avec les cours relatifs au module de formation choisi</li>
-          </ul>
+        <div class="setup-info">
+          <h3>⚠️ Prochaines Étapes</h3>
+          <ol>
+            <li>Vous recevrez un email d'accès à votre tableau de bord PleniShop</li>
+            <li>Configurez votre boutique avec vos informations</li>
+            ${
+              orderData.productSetupOption === "assistance"
+                ? `<li>Envoyez votre dossier à support@plenisofts.org</li>
+              <li>Notre équipe mettra en place votre boutique</li>`
+                : `<li>Ajoutez vos produits via le tableau de bord</li>`
+            }
+            <li>Lancez votre boutique en ligne!</li>
+          </ol>
+        </div>
+
+        <div class="contact-info">
+          <h3>📧 Support</h3>
+          <p>Pour toute question, contacter-nous :</p>
+          <p><strong>Email:</strong> <a href="mailto:support@plenisofts.org">support@plenisofts.org</a></p>
+          <p><strong>Site:</strong> <a href="https://plenisofts.org">plenisofts.org</a></p>
         </div>
 
         <div class="footer">
-          <p>Merci de votre confiance ! 🎵</p>
-          <p><strong>Équipe CHADAH</strong></p>
-          <p>L'équipe CHADAH est ravie de vous accompagner dans votre parcours musical.</p>
-          <p>Pour toute question, n'hésitez pas à nous contacter.</p>
+          <p>Merci de votre confiance! 🎉</p>
+          <p><strong>Équipe PleniShop</strong></p>
+          <p>Créons votre boutique en ligne de rêve ensemble!</p>
         </div>
       </body>
       </html>
     `
+
     const mailOptions = {
       from: process.env.SMTP_USER,
-      to: orderData.email,
-      cc: process.env.PLENISOFTS_EMAIL,
-      subject: `Confirmation d'inscription - Chadah Academy - ${orderData.name}`,
-      html: htmlContent
+      to: orderData.shopEmail,
+      cc: orderData.managerEmail,
+      subject: `Confirmation d'inscription PleniShop - ${orderData.shopName}`,
+      html: htmlContent,
     }
 
     await transporter.sendMail(mailOptions)

@@ -6,18 +6,17 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   AlertCircle,
-  Music,
+  Store,
   User,
-  CreditCard,
+  Package,
   ChevronLeft,
   ChevronRight,
   Check,
-  Piano,
-  Mic,
-  Wallet,
+  ShoppingCart,
+  FileText,
+  Upload,
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
@@ -26,212 +25,146 @@ import { sendOrderConfirmationEmail } from "@/lib/email"
 import { useRouter } from "next/navigation"
 
 interface FormData {
-  name: string
-  phone: string
-  email: string
+  // Step 1: Shop Manager Info
+  managerName: string
+  managerEmail: string
+  managerPhone: string
+  // Step 1: Shop Info
+  shopName: string
+  shopEmail: string
+  shopPhone: string
+  city: string
+  country: string
   currency: "EUR" | "FCFA"
-  selectedModule: string
-  accompanimentPacks: { [key: string]: number }
+  // Step 2: Products
+  productSetupOption: "self" | "assistance" | ""
+  excelFile?: File
+  // Step 3: Package
+  selectedPackage: "free" | "starter" | "pro" | "enterprise" | ""
   comments: string
-  paymentFrequency: "monthly" | "quarterly" | "biannual" | "annual"
-  paymentMethod: "bank" | "mobile" | "paypal"
 }
 
-const MODULES_CHADAH = [
+const PACKAGES = [
   {
-    id: "chant",
-    name: "Chant",
-    description: "Apprenez à chanter et à harmoniser les cantiques",
-    icon: "🎤",
+    id: "free",
+    name: "Free",
+    description: "Gratuit - Parfait pour commencer",
+    priceEUR: 0,
+    priceFCFA: 0,
+    features: [
+      "5 produits",
+      "10 commandes par mois",
+      "Support par email",
+    ],
+    icon: "🎁",
   },
   {
-    id: "piano",
-    name: "Piano",
-    description: "Apprenez à jouer au piano et à accompagner les cantiques",
-    icon: "🎹",
-  },
-  {
-    id: "guitare",
-    name: "Guitare",
-    description: "Apprenez à jouer à la guitare et à accompagner les cantiques",
-    icon: "🎸",
-  },
-  {
-    id: "percussion",
-    name: "Percussion",
-    description: "Apprenez à jouer aux percussions et à accompagner les cantiques",
-    icon: "🥁",
-  },
-]
-
-// Prix unique pour tous les modules: 20 EUR ou 10.000 FCFA / mois
-const MODULE_PRICE_EUR = 20
-const MODULE_PRICE_FCFA = 10000
-
-const ACCOMPANIMENT_PACKS = [
-  {
-    id: "asaph",
-    name: "Pack Asaph",
-    description: "Écriture de chant chrétien",
+    id: "starter",
+    name: "Starter",
+    description: "Pour les petites boutiques",
     priceEUR: 10,
-    priceFCFA: 5000,
-    icon: "✍️",
+    priceFCFA: 6550,
+    features: [
+      "50 produits",
+      "100 commandes par mois",
+      "Domaine personnalisé",
+      "Support prioritaire",
+      "Statistiques avancées",
+      "Export des données",
+    ],
+    icon: "🚀",
   },
   {
-    id: "ethan1",
-    name: "Pack Ethan 1",
-    description: "Instrumentation Piano/Guitare",
+    id: "pro",
+    name: "Pro",
+    description: "Pour les boutiques en croissance",
     priceEUR: 20,
-    priceFCFA: 10000,
-    icon: "🎹",
+    priceFCFA: 13100,
+    features: [
+      "500 produits",
+      "1000 commandes par mois",
+      "Domaine personnalisé",
+      "Support prioritaire 24/7",
+      "Statistiques avancées",
+      "Export des données",
+      "Multi-devises",
+      "Multi-langues",
+      "Intégrations avancées",
+    ],
+    icon: "⭐",
   },
   {
-    id: "ethan2",
-    name: "Pack Ethan 2",
-    description: "Instrumentation Piano/Bass/Rythmique",
-    priceEUR: 100,
-    priceFCFA: 50000,
-    icon: "🎸",
-  },
-  {
-    id: "ethan3",
-    name: "Pack Ethan 3",
-    description: "Instrumentation enrichie",
-    priceEUR: 300,
-    priceFCFA: 150000,
-    icon: "🎺",
-  },
-  {
-    id: "heman1",
-    name: "Pack Heman 1",
-    description: "Conduite de Louange",
-    priceEUR: 20,
-    priceFCFA: 10000,
-    icon: "🎤",
-  },
-  {
-    id: "heman2",
-    name: "Pack Heman 2",
-    description: "Production SON (studio)",
-    priceEUR: 400,
-    priceFCFA: 200000,
-    icon: "🎧",
-  },
-  {
-    id: "heman3",
-    name: "Pack Heman 3",
-    description: "Production VIDEO (clip)",
-    priceEUR: 1000,
-    priceFCFA: 500000,
-    icon: "🎬",
-  },
-  {
-    id: "heman4",
-    name: "Pack Heman 4",
-    description: "Déploiement sur les réseaux sociaux",
-    priceEUR: 20,
-    priceFCFA: 50000,
-    icon: "📱",
+    id: "enterprise",
+    name: "Enterprise",
+    description: "Pour les grandes boutiques",
+    priceEUR: 50,
+    priceFCFA: 32800,
+    features: [
+      "Produits illimités",
+      "Commandes illimitées",
+      "Domaine personnalisé",
+      "Support dédié",
+      "Toutes les fonctionnalités Pro",
+      "API personnalisé",
+      "Formation dédiée",
+      "Gestion multi-boutiques",
+    ],
+    icon: "👑",
   },
 ]
 
 const STEPS = [
-  { id: 1, title: "Informations", icon: User },
-  { id: 2, title: "Module Chadah", icon: Music },
-  { id: 3, title: "Accompagnements", icon: Piano },
-  { id: 4, title: "Paiement", icon: Wallet },
-  { id: 5, title: "Commentaires", icon: Mic },
-  { id: 6, title: "Récapitulatif", icon: CreditCard },
+  { id: 1, title: "Boutique", icon: Store },
+  { id: 2, title: "Produits", icon: Package },
+  { id: 3, title: "Pack", icon: ShoppingCart },
+  { id: 4, title: "Récapitulatif", icon: FileText },
 ]
 
 export function MultiStepOrderForm() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [excelFile, setExcelFile] = useState<File | null>(null)
   const router = useRouter()
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    phone: "",
-    email: "",
+    managerName: "",
+    managerEmail: "",
+    managerPhone: "",
+    shopName: "",
+    shopEmail: "",
+    shopPhone: "",
+    city: "",
+    country: "",
     currency: "EUR",
-    selectedModule: "",
-    accompanimentPacks: {},
+    productSetupOption: "",
+    selectedPackage: "",
     comments: "",
-    paymentFrequency: "monthly",
-    paymentMethod: "bank",
   })
 
-  const calculateTotal = () => {
-    let modulesTotal = 0
-    let accompanimentTotal = 0
-
-    // Prix unique pour le module sélectionné (20 EUR ou 10.000 FCFA / mois)
-    if (formData.selectedModule) {
-      const basePrice = formData.currency === "EUR" ? MODULE_PRICE_EUR : MODULE_PRICE_FCFA
-      const frequencyMultiplier = getFrequencyMultiplier(formData.paymentFrequency)
-      modulesTotal = basePrice * frequencyMultiplier
-    }
-
-    Object.entries(formData.accompanimentPacks).forEach(([packId, quantity]) => {
-      const pack = ACCOMPANIMENT_PACKS.find((p) => p.id === packId)
-      if (pack && quantity > 0) {
-        const price = formData.currency === "EUR" ? pack.priceEUR : pack.priceFCFA
-        accompanimentTotal += price * quantity
-      }
-    })
-
-    return { modulesTotal, accompanimentTotal, total: modulesTotal + accompanimentTotal }
-  }
-
-  const getFrequencyMultiplier = (frequency: string) => {
-    switch (frequency) {
-      case "monthly":
-        return 1
-      case "quarterly":
-        return 3
-      case "biannual":
-        return 6
-      case "annual":
-        return 12
-      default:
-        return 1
-    }
-  }
-
-  const getFrequencyLabel = (frequency: string) => {
-    switch (frequency) {
-      case "monthly":
-        return "Mensuelle"
-      case "quarterly":
-        return "Trimestrielle"
-      case "biannual":
-        return "Semestrielle"
-      case "annual":
-        return "Annuelle"
-      default:
-        return "Mensuelle"
-    }
-  }
-
-  const updateAccompanimentQuantity = (packId: string, quantity: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      accompanimentPacks: {
-        ...prev.accompanimentPacks,
-        [packId]: Math.max(0, quantity),
-      },
-    }))
+  const calculatePackagePrice = () => {
+    if (!formData.selectedPackage) return 0
+    const pkg = PACKAGES.find((p) => p.id === formData.selectedPackage)
+    if (!pkg || pkg.id === "free") return 0
+    return formData.currency === "EUR" ? pkg.priceEUR || 0 : pkg.priceFCFA || 0
   }
 
   const canProceedToNext = () => {
     switch (currentStep) {
       case 1:
-        return formData.name && formData.phone && formData.email
+        return (
+          formData.managerName &&
+          formData.managerEmail &&
+          formData.managerPhone &&
+          formData.shopName &&
+          formData.shopEmail &&
+          formData.city &&
+          formData.country
+        )
       case 2:
-        return formData.selectedModule !== ""
+        return formData.productSetupOption !== ""
       case 3:
+        return formData.selectedPackage !== ""
       case 4:
-      case 5:
         return true
       default:
         return false
@@ -250,19 +183,39 @@ export function MultiStepOrderForm() {
     }
   }
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setExcelFile(file)
+      setFormData((prev) => ({ ...prev, excelFile: file }))
+    }
+  }
+
   const handleSubmit = async () => {
     setIsSubmitting(true)
     setSubmitMessage(null)
 
     try {
-      const totals = calculateTotal()
+      const packagePrice = calculatePackagePrice()
+      const packageName = PACKAGES.find((p) => p.id === formData.selectedPackage)?.name || ""
+
       const submissionData = {
-        ...formData,
-        totalPrice: totals.total,
-        modulesTotal: totals.modulesTotal,
-        accompanimentTotal: totals.accompanimentTotal,
-        paymentFrequency: formData.paymentFrequency,
-        paymentMethod: formData.paymentMethod,
+        managerName: formData.managerName,
+        managerEmail: formData.managerEmail,
+        managerPhone: formData.managerPhone,
+        shopName: formData.shopName,
+        shopEmail: formData.shopEmail,
+        shopPhone: formData.shopPhone,
+        city: formData.city,
+        country: formData.country,
+        currency: formData.currency,
+        productSetupOption: formData.productSetupOption,
+        excelFileName: excelFile?.name,
+        selectedPackage: formData.selectedPackage,
+        packagePrice,
+        packageName,
+        comments: formData.comments,
+        submittedAt: new Date().toISOString(),
       }
 
       console.log("[v0] Submitting directly to Google Sheets:", submissionData)
@@ -276,28 +229,22 @@ export function MultiStepOrderForm() {
 
           if (!emailResult.success) {
             console.warn("[v0] Email sending failed:", emailResult.message)
-            // Continue with success flow even if email fails
           } else {
             console.log("[v0] Confirmation email sent successfully")
           }
         } catch (emailError) {
           console.warn("[v0] Email sending error:", emailError)
-          // Continue with success flow even if email fails
         }
 
-        const selectedModuleName = MODULES_CHADAH.find(m => m.id === formData.selectedModule)?.name || ""
         const params = new URLSearchParams({
-          total: totals.total.toString(),
-          currency: formData.currency,
-          modulesTotal: totals.modulesTotal.toString(),
-          accompanimentTotal: totals.accompanimentTotal.toString(),
-          frequency: getFrequencyLabel(formData.paymentFrequency),
-          module: selectedModuleName,
+          shopName: formData.shopName,
+          packageName: packageName,
+          setupOption: formData.productSetupOption === "self" ? "Paramétrage personnel" : "Assistance PLENISOFTS",
         })
         router.push(`/success?${params.toString()}`)
         console.log("[v0] Form submitted successfully, redirecting to success page")
       } else {
-        setSubmitMessage({ type: "error", text: result.message })
+        setSubmitMessage({ type: "error", text: result.message || "Erreur lors de la soumission" })
         console.log("[v0] Form submission failed:", result.message)
       }
     } catch (error) {
@@ -318,77 +265,153 @@ export function MultiStepOrderForm() {
           <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 heading-responsive">
-                <User className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
-                Informations Personnelles
+                <Store className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                Informations de votre Boutique
               </CardTitle>
             </CardHeader>
             <CardContent className="spacing-responsive">
-              <div>
-                <Label htmlFor="name" className="text-responsive">
-                  Nom complet *
-                </Label>
-                <Input
-                  id="name"
-                  required
-                  placeholder="Votre nom complet ou nom de groupe"
-                  value={formData.name}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                  className="mt-2 text-responsive"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="phone" className="text-responsive">
-                  Numéro de téléphone (WhatsApp de préférence) *
-                </Label>
-                <div className="flex flex-col sm:flex-row gap-2 mt-2">
+              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg mb-6 border border-blue-200 dark:border-blue-800">
+                <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3">Informations du Gérant</h3>
+                
+                <div>
+                  <Label htmlFor="managerName" className="text-responsive">
+                    Nom complet du gérant *
+                  </Label>
                   <Input
-                    id="phone"
-                    type="tel"
+                    id="managerName"
                     required
-                    placeholder="ex: +212699999999"
-                    value={formData.phone}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-                    className="flex-1 text-responsive"
+                    placeholder="Votre nom complet"
+                    value={formData.managerName}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, managerName: e.target.value }))}
+                    className="mt-2 text-responsive"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="managerEmail" className="text-responsive mt-4 block">
+                    Email personnel du gérant *
+                  </Label>
+                  <Input
+                    id="managerEmail"
+                    type="email"
+                    required
+                    placeholder="votre@email.com"
+                    value={formData.managerEmail}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, managerEmail: e.target.value }))}
+                    className="mt-2 text-responsive"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="managerPhone" className="text-responsive mt-4 block">
+                    Téléphone du gérant (optionnel)
+                  </Label>
+                  <Input
+                    id="managerPhone"
+                    type="tel"
+                    placeholder="+212699999999"
+                    value={formData.managerPhone}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, managerPhone: e.target.value }))}
+                    className="mt-2 text-responsive"
                   />
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="email" className="text-responsive">
-                  Email *
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  required
-                  placeholder="votre@email.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                  className="mt-2 text-responsive"
-                />
-              </div>
+              <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                <h3 className="font-semibold text-green-900 dark:text-green-100 mb-3">Informations de la Boutique</h3>
+                
+                <div>
+                  <Label htmlFor="shopName" className="text-responsive">
+                    Nom de votre boutique *
+                  </Label>
+                  <Input
+                    id="shopName"
+                    required
+                    placeholder="Nom de votre boutique"
+                    value={formData.shopName}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, shopName: e.target.value }))}
+                    className="mt-2 text-responsive"
+                  />
+                </div>
 
-              <div>
-                <Label className="text-responsive">Zone (Devise choisie) *</Label>
-                <RadioGroup
-                  value={formData.currency}
-                  onValueChange={(value: "EUR" | "FCFA") => setFormData((prev) => ({ ...prev, currency: value }))}
-                  className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-2"
-                >
-                  <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors border-l-4 border-l-accent/50">
-                    <RadioGroupItem value="EUR" id="eur" />
-                    <Label htmlFor="eur" className="text-responsive cursor-pointer">
-                      🇪🇺 EUR
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-3 rounded-lg border border-secondary/20 hover:bg-secondary/10 transition-colors border-l-4 border-l-secondary/50">
-                    <RadioGroupItem value="FCFA" id="fcfa" />
-                    <Label htmlFor="fcfa" className="text-responsive cursor-pointer">
-                      🌍 FCFA
-                    </Label>
-                  </div>
-                </RadioGroup>
+                <div>
+                  <Label htmlFor="shopEmail" className="text-responsive mt-4 block">
+                    Email de contact de la boutique *
+                  </Label>
+                  <Input
+                    id="shopEmail"
+                    type="email"
+                    required
+                    placeholder="contact@boutique.com"
+                    value={formData.shopEmail}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, shopEmail: e.target.value }))}
+                    className="mt-2 text-responsive"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="shopPhone" className="text-responsive mt-4 block">
+                    Téléphone de la boutique (optionnel)
+                  </Label>
+                  <Input
+                    id="shopPhone"
+                    type="tel"
+                    placeholder="+212699999999"
+                    value={formData.shopPhone}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, shopPhone: e.target.value }))}
+                    className="mt-2 text-responsive"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="city" className="text-responsive mt-4 block">
+                    Ville *
+                  </Label>
+                  <Input
+                    id="city"
+                    required
+                    placeholder="Casablanca"
+                    value={formData.city}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, city: e.target.value }))}
+                    className="mt-2 text-responsive"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="country" className="text-responsive mt-4 block">
+                    Pays *
+                  </Label>
+                  <Input
+                    id="country"
+                    required
+                    placeholder="Maroc"
+                    value={formData.country}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, country: e.target.value }))}
+                    className="mt-2 text-responsive"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-responsive mt-4 block font-semibold">Devise *</Label>
+                  <RadioGroup
+                    value={formData.currency}
+                    onValueChange={(value: "EUR" | "FCFA") => setFormData((prev) => ({ ...prev, currency: value }))}
+                    className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-2"
+                  >
+                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-primary/20 hover:bg-primary/10 transition-colors border-l-4 border-l-primary">
+                      <RadioGroupItem value="EUR" id="eur" />
+                      <Label htmlFor="eur" className="text-responsive cursor-pointer">
+                        🇪🇺 EUR
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-secondary/20 hover:bg-secondary/10 transition-colors border-l-4 border-l-secondary">
+                      <RadioGroupItem value="FCFA" id="fcfa" />
+                      <Label htmlFor="fcfa" className="text-responsive cursor-pointer">
+                        🌍 FCFA
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -399,58 +422,163 @@ export function MultiStepOrderForm() {
           <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 heading-responsive">
-                <Music className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                Sélection du Module Chadah
+                <Package className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
+                Configuration de vos Produits
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="mb-4 p-3 sm:p-4 bg-primary/10 rounded-lg border border-primary/20">
-                <p className="text-sm sm:text-base font-semibold text-primary">
-                  {formData.currency === "EUR" ? "20 EUR" : "10.000 FCFA"} / mois pour le module choisi
-                </p>
-              </div>
-              
-              <Alert className="mb-6 border-accent/30 bg-accent/5">
-                <AlertCircle className="h-4 w-4 text-accent" />
+            <CardContent className="spacing-responsive">
+              <Alert className="mb-6 border-secondary/30 bg-secondary/5">
+                <AlertCircle className="h-4 w-4 text-secondary" />
                 <AlertDescription className="text-xs sm:text-sm">
-                  <strong>Nota:</strong> En fonction du module choisi, vous serez soumis(e) à un test d'évaluation afin de vous inscrire dans la classe correspondant à votre niveau d'apprentissage.
+                  Choisissez comment vous souhaitez gérer le paramétrage de vos produits et de votre catalogue.
                 </AlertDescription>
               </Alert>
 
               <RadioGroup
-                value={formData.selectedModule}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, selectedModule: value }))}
-                className="space-y-3"
+                value={formData.productSetupOption}
+                onValueChange={(value: "self" | "assistance") => setFormData((prev) => ({ ...prev, productSetupOption: value }))}
+                className="space-y-4"
               >
-                {MODULES_CHADAH.map((module) => (
-                  <div
-                    key={module.id}
-                    className={`flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer ${
-                      formData.selectedModule === module.id
-                        ? "border-primary bg-primary/10 border-l-4 border-l-primary"
-                        : "border-l-4 border-l-accent/50"
-                    }`}
-                  >
-                    <RadioGroupItem value={module.id} id={module.id} className="mt-1" />
-                    <div className="flex-1 min-w-0">
-                      <Label
-                        htmlFor={module.id}
-                        className="font-medium cursor-pointer flex items-center gap-2 text-responsive"
-                      >
-                        <span className="text-xl sm:text-2xl">{module.icon}</span>
-                        {module.name}
-                      </Label>
-                      <p className="text-xs sm:text-sm text-muted-foreground mt-1 text-pretty">{module.description}</p>
-                    </div>
+                {/* Option 1: Self Setup */}
+                <div
+                  className={`flex items-start space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                    formData.productSetupOption === "self"
+                      ? "border-secondary bg-secondary/10"
+                      : "border-muted-foreground/30 hover:border-secondary/50"
+                  }`}
+                >
+                  <RadioGroupItem value="self" id="self-setup" className="mt-1" />
+                  <div className="flex-1">
+                    <Label
+                      htmlFor="self-setup"
+                      className="text-base font-semibold cursor-pointer text-responsive"
+                    >
+                      📋 Je vais m'occuper moi-même du paramétrage
+                    </Label>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Vous pouvez gérer directement vos produits, catégories et configurations dans votre tableau de bord PleniShop. Aucune assistance requise à cette étape.
+                    </p>
                   </div>
-                ))}
+                </div>
+
+                {/* Option 2: Assistance */}
+                <div
+                  className={`flex items-start space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                    formData.productSetupOption === "assistance"
+                      ? "border-secondary bg-secondary/10"
+                      : "border-muted-foreground/30 hover:border-secondary/50"
+                  }`}
+                >
+                  <RadioGroupItem value="assistance" id="assistance-setup" className="mt-1" />
+                  <div className="flex-1">
+                    <Label
+                      htmlFor="assistance-setup"
+                      className="text-base font-semibold cursor-pointer text-responsive"
+                    >
+                      🤝 Je souhaite l'assistance de l'équipe PLENISOFTS
+                    </Label>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Notre équipe vous accompagnera dans le paramétrage de votre boutique et la configuration de vos produits.
+                    </p>
+                  </div>
+                </div>
               </RadioGroup>
 
-              {formData.selectedModule && (
-                <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-primary/20">
-                  <p className="text-sm font-medium">
-                    Module sélectionné : {MODULES_CHADAH.find(m => m.id === formData.selectedModule)?.name}
-                  </p>
+              {/* Assistance Option Details */}
+              {formData.productSetupOption === "assistance" && (
+                <div className="mt-6 space-y-4">
+                  {/* Download Model Section */}
+                  <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      Modèle de Document à Remplir
+                    </h3>
+                    
+                    <p className="text-sm text-amber-800 dark:text-amber-200 mb-4">
+                      Pour faciliter l'assistance de notre équipe, veuillez :
+                    </p>
+                    
+                    <div className="bg-white dark:bg-slate-900 p-4 rounded mb-4 border border-amber-200 dark:border-amber-700">
+                      <ol className="text-sm text-amber-900 dark:text-amber-100 space-y-2">
+                        <li className="flex gap-2">
+                          <span className="font-bold">1.</span>
+                          <span>
+                            Téléchargez le modèle de document en cliquant sur le lien ci-dessous
+                          </span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold">2.</span>
+                          <span>
+                            Dézippez le fichier
+                          </span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold">3.</span>
+                          <span>
+                            Remplissez le dossier selon les consignes ci-dessous
+                          </span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold">4.</span>
+                          <span>
+                            Rezippez le dossier complété
+                          </span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold">5.</span>
+                          <span>
+                            Envoyez le fichier à : <strong>support@plenisofts.org</strong>
+                          </span>
+                        </li>
+                      </ol>
+                    </div>
+
+                    <a
+                      href="https://plenisofts.org/shop/templates/model.zip"
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Télécharger le modèle (ZIP)
+                    </a>
+                  </div>
+
+                  {/* Instructions Section */}
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+                      📋 Consignes de Remplissage du Dossier
+                    </h3>
+                    
+                    <div className="space-y-3 text-sm text-blue-900 dark:text-blue-100">
+                      <div>
+                        <p className="font-semibold mb-1">Fichier Excel :</p>
+                        <ul className="list-disc list-inside space-y-1 text-xs sm:text-sm ml-2">
+                          <li>Remplissez vos produits avec les informations détaillées</li>
+                          <li><strong>Identifiant du produit</strong> : Code unique pour chaque produit (ex: PROD-001, lait-gallia-500g, etc.)</li>
+                          <li><strong>Identifiant de la catégorie</strong> : Code unique pour chaque catégorie (ex: CAT-001, charcuterie, laiterie, etc.)</li>
+                          <li>Tous les autres champs requis : nom, description, prix, stock, etc.</li>
+                        </ul>
+                      </div>
+
+                      <div>
+                        <p className="font-semibold mb-1">Dossier Images :</p>
+                        <ul className="list-disc list-inside space-y-1 text-xs sm:text-sm ml-2">
+                          <li>Créez un dossier nommé <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">images</code></li>
+                          <li><strong>Images de produits</strong> : Nommez-les avec l'identifiant du produit (ex: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">lait-gallia-500g.png</code>, <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">PROD-001.jpg</code>)</li>
+                          <li><strong>Images de catégories</strong> : Nommez-les avec l'identifiant de la catégorie (ex: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">charcuterie.png</code>, <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">CAT-001.jpg</code>)</li>
+                          <li>Formats acceptés : PNG, JPG, JPEG</li>
+                        </ul>
+                      </div>
+
+                      <div className="pt-2 border-t border-blue-300 dark:border-blue-600">
+                        <p className="text-xs text-blue-700 dark:text-blue-300 italic">
+                          ℹ️ Notre équipe examinera votre dossier et mettra en place votre boutique avec tous vos produits, catégories et images.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -462,249 +590,121 @@ export function MultiStepOrderForm() {
           <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 heading-responsive">
-                <Piano className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
-                Packs d'Accompagnement (Optionnel)
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
+                Sélectionnez votre Pack
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {ACCOMPANIMENT_PACKS.map((pack) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {PACKAGES.map((pkg) => (
                   <div
-                    key={pack.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors border-l-4 border-l-secondary/50 gap-3 sm:gap-0"
+                    key={pkg.id}
+                    className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      formData.selectedPackage === pkg.id
+                        ? "border-accent bg-accent/10 shadow-lg"
+                        : "border-muted-foreground/30 hover:border-accent/50"
+                    }`}
+                    onClick={() => setFormData((prev) => ({ ...prev, selectedPackage: pkg.id as any }))}
                   >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          id={pack.id}
-                          checked={(formData.accompanimentPacks[pack.id] || 0) > 0}
-                          onCheckedChange={(checked) => {
-                            updateAccompanimentQuantity(pack.id, checked ? 1 : 0)
-                          }}
-                          className="mt-1"
-                        />
-                        <div className="min-w-0">
-                          <Label
-                            htmlFor={pack.id}
-                            className="font-medium cursor-pointer flex items-center gap-2 text-responsive"
-                          >
-                            <span className="text-base sm:text-lg">{pack.icon}</span>
-                            {pack.name}
-                          </Label>
-                          <p className="text-xs sm:text-sm text-muted-foreground text-pretty">{pack.description}</p>
-                          <p className="text-xs sm:text-sm font-semibold text-secondary">
-                            {formData.currency === "EUR"
-                              ? pack.priceEUR + " EUR"
-                              : pack.priceFCFA.toLocaleString() + " FCFA"}{" "}
-                            par chant
-                          </p>
-                        </div>
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-2xl mb-2">{pkg.icon}</p>
+                        <h3 className="font-bold text-lg">{pkg.name}</h3>
+                        <p className="text-xs text-muted-foreground mt-1">{pkg.description}</p>
                       </div>
+                      {formData.selectedPackage === pkg.id && (
+                        <Check className="h-5 w-5 text-accent" />
+                      )}
                     </div>
-                    <div className="flex items-center justify-center sm:justify-end space-x-2 ml-8 sm:ml-0">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          updateAccompanimentQuantity(pack.id, (formData.accompanimentPacks[pack.id] || 0) - 1)
-                        }
-                        disabled={(formData.accompanimentPacks[pack.id] || 0) <= 0}
-                        className="h-8 w-8 p-0"
-                      >
-                        -
-                      </Button>
-                      <span className="w-8 text-center font-medium text-responsive">
-                        {formData.accompanimentPacks[pack.id] || 0}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          updateAccompanimentQuantity(pack.id, (formData.accompanimentPacks[pack.id] || 0) + 1)
-                        }
-                        className="h-8 w-8 p-0"
-                      >
-                        +
-                      </Button>
+
+                    {pkg.id !== "free" && (
+                      <div className="bg-accent/20 p-2 rounded mb-3 text-center">
+                        <p className="font-bold text-accent">
+                          {formData.currency === "EUR"
+                            ? `${(pkg as any).priceEUR || 0} EUR`
+                            : `${((pkg as any).priceFCFA || 0).toLocaleString()} FCFA`}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      {pkg.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-sm">
+                          <Check className="h-3 w-3 text-green-600" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
               </div>
+
+              {formData.selectedPackage && (
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-accent/20">
+                  <p className="text-sm font-medium">
+                    Pack sélectionné : <strong>{PACKAGES.find(p => p.id === formData.selectedPackage)?.name}</strong>
+                  </p>
+                  {calculatePackagePrice() > 0 && (
+                    <p className="text-sm mt-2">
+                      Prix : <strong>{calculatePackagePrice()} {formData.currency}</strong>
+                    </p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         )
 
       case 4:
+        const packagePrice = calculatePackagePrice()
+        const packageName = PACKAGES.find((p) => p.id === formData.selectedPackage)?.name || ""
+        
         return (
           <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 heading-responsive">
-                <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
-                Options de Paiement
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                Récapitulatif de votre inscription
               </CardTitle>
             </CardHeader>
             <CardContent className="spacing-responsive">
-              {formData.selectedModule && (
-                <div>
-                  <Label className="text-responsive font-semibold">
-                    Fréquence de paiement (Module Chadah)
-                  </Label>
-                  <RadioGroup
-                    value={formData.paymentFrequency}
-                    onValueChange={(value: "monthly" | "quarterly" | "biannual" | "annual") =>
-                      setFormData((prev) => ({ ...prev, paymentFrequency: value }))
-                    }
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3"
-                  >
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors">
-                      <RadioGroupItem value="monthly" id="monthly" />
-                      <Label htmlFor="monthly" className="text-responsive cursor-pointer">
-                        Mensuelle
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors">
-                      <RadioGroupItem value="quarterly" id="quarterly" />
-                      <Label htmlFor="quarterly" className="text-responsive cursor-pointer">
-                        Trimestrielle
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors">
-                      <RadioGroupItem value="biannual" id="biannual" />
-                      <Label htmlFor="biannual" className="text-responsive cursor-pointer">
-                        Semestrielle
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-accent/20 hover:bg-accent/10 transition-colors">
-                      <RadioGroupItem value="annual" id="annual" />
-                      <Label htmlFor="annual" className="text-responsive cursor-pointer">
-                        Annuelle
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              )}
-
-              <div>
-                <Label className="text-responsive font-semibold">Moyen de paiement</Label>
-                <RadioGroup
-                  value={formData.paymentMethod}
-                  onValueChange={(value: "bank" | "mobile" | "paypal") =>
-                    setFormData((prev) => ({ ...prev, paymentMethod: value }))
-                  }
-                  className="space-y-4 mt-3"
-                >
-                  <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <RadioGroupItem value="bank" id="bank" />
-                      <Label htmlFor="bank" className="text-responsive cursor-pointer font-medium">
-                        🏦 Par Virement / Versement / Transfert (RIA, MoneyGram, WU)
-                      </Label>
-                    </div>
-                    {formData.paymentMethod === "bank" && (
-                      <div className="ml-6 space-y-2 text-xs sm:text-sm bg-muted/30 p-3 rounded">
-                        <p>
-                          <strong>IBAN:</strong> MA64 013 780 0117320100800123 48
-                        </p>
-                        <p>
-                          <strong>RIB:</strong> 013 780 0117320100800123 48
-                        </p>
-                        <p>
-                          <strong>Code SWIFT:</strong> BMCIMAMC
-                        </p>
-                        <p>
-                          <strong>Titulaire:</strong> DOGBRE SOKORA JEAN-CHRISTOPHE
-                        </p>
-                        <p>
-                          <strong>Adresse:</strong> Casablanca, Maroc
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <RadioGroupItem value="mobile" id="mobile" />
-                      <Label htmlFor="mobile" className="text-responsive cursor-pointer font-medium">
-                        📱 Par Mobile Money
-                      </Label>
-                    </div>
-                    {formData.paymentMethod === "mobile" && (
-                      <div className="ml-6 space-y-2 text-xs sm:text-sm bg-muted/30 p-3 rounded">
-                        <p>
-                          <strong>🇨🇮 Côte d'Ivoire (Orange / Wave):</strong> +2250703833108
-                        </p>
-                        <p>
-                          <strong>🇧🇫 Burkina Faso (Orange):</strong> +22654725339
-                        </p>
-                        <p>
-                          <strong>🇸🇳 Sénégal (Orange / Wave):</strong> +221775091447
-                        </p>
-                        <p>
-                          <strong>🇬🇦 Gabon (Airtel):</strong>+24177309444
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </RadioGroup>
-              </div>
-            </CardContent>
-          </Card>
-        )
-
-      case 5:
-        return (
-          <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 heading-responsive">
-                <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
-                Commentaires et Suggestions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div>
-                <Label htmlFor="comments" className="text-responsive">
-                  Vos commentaires et suggestions (optionnel)
-                </Label>
-                <Textarea
-                  id="comments"
-                  placeholder="Partagez vos besoins spécifiques, suggestions ou questions..."
-                  value={formData.comments}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, comments: e.target.value }))}
-                  className="mt-2 text-responsive min-h-[120px] sm:min-h-[150px]"
-                  rows={6}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        )
-
-      case 6:
-        const totals = calculateTotal()
-        return (
-          <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 heading-responsive">
-                <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                Récapitulatif de votre commande
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="spacing-responsive">
-              <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-accent/20">
+              {/* Manager Info */}
+              <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-primary/20">
                 <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
-                  <User className="h-4 w-4 text-accent" />
-                  Informations personnelles
+                  <User className="h-4 w-4 text-primary" />
+                  Gérant de la Boutique
                 </h3>
                 <div className="text-xs sm:text-sm space-y-1">
                   <p>
-                    <strong>Nom:</strong> {formData.name}
+                    <strong>Nom:</strong> {formData.managerName}
                   </p>
                   <p>
-                    <strong>Téléphone:</strong> {formData.phone}
+                    <strong>Email:</strong> {formData.managerEmail}
                   </p>
                   <p>
-                    <strong>Email:</strong> {formData.email}
+                    <strong>Téléphone:</strong> {formData.managerPhone || "Non fourni"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Shop Info */}
+              <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-secondary/20">
+                <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
+                  <Store className="h-4 w-4 text-secondary" />
+                  Informations de la Boutique
+                </h3>
+                <div className="text-xs sm:text-sm space-y-1">
+                  <p>
+                    <strong>Nom:</strong> {formData.shopName}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {formData.shopEmail}
+                  </p>
+                  <p>
+                    <strong>Téléphone:</strong> {formData.shopPhone || "Non fourni"}
+                  </p>
+                  <p>
+                    <strong>Localisation:</strong> {formData.city}, {formData.country}
                   </p>
                   <p>
                     <strong>Devise:</strong> {formData.currency}
@@ -712,138 +712,92 @@ export function MultiStepOrderForm() {
                 </div>
               </div>
 
-              {formData.selectedModule && (
-                <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-primary/20">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
-                    <Music className="h-4 w-4 text-primary" />
-                    Module Chadah sélectionné
-                  </h3>
-                  <div className="text-xs sm:text-sm space-y-2">
-                    {(() => {
-                      const module = MODULES_CHADAH.find((m) => m.id === formData.selectedModule)
-                      return module ? (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/20 rounded-full text-primary">
-                          {module.icon} {module.name}
-                        </span>
-                      ) : null
-                    })()}
-                    <p>
-                      <strong>Fréquence:</strong> {getFrequencyLabel(formData.paymentFrequency)}
-                    </p>
-                    <p className="text-primary font-semibold">
-                      Total: {totals.modulesTotal.toLocaleString()} {formData.currency}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {Object.entries(formData.accompanimentPacks).some(([_, qty]) => qty > 0) && (
-                <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-secondary/20">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
-                    <Piano className="h-4 w-4 text-secondary" />
-                    Packs d'accompagnement
-                  </h3>
-                  <div className="space-y-2 text-xs sm:text-sm">
-                    {Object.entries(formData.accompanimentPacks).map(([packId, quantity]) => {
-                      if (quantity <= 0) return null
-                      const pack = ACCOMPANIMENT_PACKS.find((p) => p.id === packId)
-                      if (!pack) return null
-                      const price = formData.currency === "EUR" ? pack.priceEUR : pack.priceFCFA
-                      return (
-                        <div
-                          key={packId}
-                          className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0"
-                        >
-                          <div className="min-w-0">
-                            <p>
-                              <strong>{pack.name}</strong> x{quantity}
-                            </p>
-                            <p className="text-muted-foreground text-xs text-pretty">{pack.description}</p>
-                          </div>
-                          <p className="text-secondary font-semibold">
-                            {(price * quantity).toLocaleString()} {formData.currency}
-                          </p>
-                        </div>
-                      )
-                    })}
-                    <div className="border-t pt-2 mt-2">
-                      <p className="text-secondary font-semibold text-right">
-                        Total accompagnement: {totals.accompanimentTotal.toLocaleString()} {formData.currency}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
+              {/* Products Setup */}
               <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-accent/20">
                 <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
-                  <Wallet className="h-4 w-4 text-accent" />
-                  Informations de paiement
+                  <Package className="h-4 w-4 text-accent" />
+                  Configuration des Produits
                 </h3>
                 <div className="text-xs sm:text-sm space-y-1">
-                  {formData.selectedModule && (
+                  <p>
+                    <strong>Option:</strong> {formData.productSetupOption === "self" ? "Paramétrage personnel" : "Assistance PLENISOFTS"}
+                  </p>
+                  {excelFile && (
                     <p>
-                      <strong>Fréquence:</strong> {getFrequencyLabel(formData.paymentFrequency)}
+                      <strong>Fichier Excel:</strong> {excelFile.name}
                     </p>
                   )}
-                  <p>
-                    <strong>Moyen de paiement:</strong>{" "}
-                    {formData.paymentMethod === "bank"
-                      ? "Virement / Transfert"
-                      : formData.paymentMethod === "mobile"
-                        ? "Mobile Money"
-                        : "PayPal"}
-                  </p>
                 </div>
               </div>
 
+              {/* Package Selection */}
+              <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-primary/20">
+                <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
+                  <ShoppingCart className="h-4 w-4 text-primary" />
+                  Pack Sélectionné
+                </h3>
+                <div className="text-xs sm:text-sm space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">{PACKAGES.find(p => p.id === formData.selectedPackage)?.icon}</span>
+                    <span className="font-semibold">{packageName}</span>
+                  </div>
+                  {packagePrice > 0 && (
+                    <div className="border-t pt-2 mt-2">
+                      <p className="text-primary font-semibold">
+                        Prix: {packagePrice} {formData.currency}
+                      </p>
+                    </div>
+                  )}
+                  {formData.selectedPackage === "free" && (
+                    <p className="text-green-600 font-semibold">Gratuit</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Comments */}
               {formData.comments && (
                 <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-accent/20">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2 text-responsive">
-                    <Mic className="h-4 w-4 text-accent" />
-                    Commentaires
-                  </h3>
+                  <h3 className="font-semibold mb-2 text-responsive">Commentaires</h3>
                   <p className="text-xs sm:text-sm text-pretty">{formData.comments}</p>
                 </div>
               )}
 
+              {/* Additional Comments Section */}
+              <div>
+                <Label htmlFor="comments" className="text-responsive">
+                  Commentaires ou questions (optionnel)
+                </Label>
+                <Textarea
+                  id="comments"
+                  placeholder="Ajoutez vos commentaires ou questions..."
+                  value={formData.comments}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, comments: e.target.value }))}
+                  className="mt-2 text-responsive min-h-[100px]"
+                  rows={4}
+                />
+              </div>
+
               <Alert className="border-accent/30 bg-accent/5 mt-4">
                 <AlertCircle className="h-4 w-4 text-accent" />
                 <AlertDescription className="text-xs sm:text-sm">
-                  <strong>NOTE IMPORTANTE</strong>
+                  <strong>IMPORTANT</strong>
                   <br />
-                  • Rejoignez si ce n'est pas encore fait notre groupe WhatsApp d'information Chadah Academy :<a 
-                    href="https://chat.whatsapp.com/EOn3a8doHhg3PgV33tbzst" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline font-medium"
-                  >Rejoindre le groupe</a>
-                  • Vous serez rajouté(e) à un autre groupe WhatsApp de travail pour des séances ponctuelles communes avec le formateur, selon les disponibilités
+                  • Vérifiez bien toutes les informations avant de confirmer votre inscription
                   <br />
-                  • Votre inscription confirmée (par paiement) vous donnera accès à la plateforme e-learning de Chadah Academy avec les cours relatifs au module de formation choisi
+                  • Vous recevrez un email de confirmation avec vos identifiants d'accès
+                  <br />
+                  • Notre équipe vous contactera pour les détails de mise en place
                 </AlertDescription>
               </Alert>
 
-              <div className="space-y-4 mt-4">
-                {totals.modulesTotal > 0 && (
-                  <div className="border-2 border-primary rounded-lg p-4 sm:p-6 text-center musical-gradient text-white shadow-lg">
-                    <h3 className="text-base sm:text-lg font-semibold mb-2">Module Chadah</h3>
-                    <p className="text-sm opacity-90">{getFrequencyLabel(formData.paymentFrequency)}</p>
-                    <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2">
-                      {totals.modulesTotal.toLocaleString()} {formData.currency}
-                    </p>
-                  </div>
-                )}
-
-                {totals.accompanimentTotal > 0 && (
-                  <div className="border-2 border-secondary rounded-lg p-4 sm:p-6 text-center bg-gradient-to-br from-secondary/20 to-secondary/10 shadow-lg">
-                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-secondary">Accompagnements</h3>
-                    <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2 text-secondary">
-                      {totals.accompanimentTotal.toLocaleString()} {formData.currency}
-                    </p>
-                  </div>
-                )}
-              </div>
+              {submitMessage && (
+                <Alert className={`mt-4 ${submitMessage.type === "error" ? "border-red-300 bg-red-50" : "border-green-300 bg-green-50"}`}>
+                  <AlertCircle className={`h-4 w-4 ${submitMessage.type === "error" ? "text-red-600" : "text-green-600"}`} />
+                  <AlertDescription className="text-xs sm:text-sm">
+                    {submitMessage.text}
+                  </AlertDescription>
+                </Alert>
+              )}
 
               <Button
                 onClick={handleSubmit}
